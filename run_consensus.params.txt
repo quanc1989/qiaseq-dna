@@ -1,0 +1,49 @@
+[general]
+# tools
+cutadaptDir = /opt/conda/bin/
+bwaDir      = /opt/conda/bin/
+javaExe     = /opt/conda/jre/bin/java/
+samtoolsDir = /srv/qgen/bin/samtools-1.3.1/
+
+# Fulcrum Genomics tools
+fgbioJar = /mnt/webserver/datadisk/resources/jdicarlo/fgbio-0.1.4-SNAPSHOT.jar
+
+# ssw for fast Smith-Waterman
+sswPyFile = /srv/qgen/bin/ssw/src/ssw_wrap.py
+
+# general params
+numCores = 0
+deleteLocalFiles = False
+samtoolsMem = 2500M
+outputDetail = True
+
+# prep - read preparation (common region trimming)
+trimScript = /srv/qgen/code/qiaseq-dna/core/prep_trim.py
+
+# genome file
+genomeFile = /srv/qgen/data/genome/ucsc.hg19.fa  ; this has some ALT haplotype mask hacks, and has NC_012920 instead of UCSC chrM (NC_001807)
+
+# umi - putative original molecule calling
+endogenousLenMin = 15
+
+# SAM tag names - used by several modules
+tagNameUmiSeq   = mi
+tagNameUmi      = Mi
+tagNamePrimer   = pr
+tagNameResample = re
+
+# parameters specific to a read set - one section per read set 
+[NEB_S2]
+readFile1 = /mnt/webserver/datadisk/resources/jdicarlo/NEB_S2_L001_R1_001.fastq.gz
+readFile2 = /mnt/webserver/datadisk/resources/jdicarlo/NEB_S2_L001_R2_001.fastq.gz
+primerFile = /srv/qgen/example/DHS-101Z.primers.txt
+
+[MS05-3-cfDNA_S2]
+readFile1 = /mnt/webserver/datadisk/resources/jdicarlo/MS05-3-cfDNA_S2_R1.fastq
+readFile2 = /mnt/webserver/datadisk/resources/jdicarlo/MS05-3-cfDNA_S2_R2.fastq
+primerFile = DHS-3501Z.primers3.txt
+
+[SRR3493403]
+readFile1 = /mnt/webserver/datadisk/resources/jdicarlo/SRR3493403_1.fastq
+readFile2 = /mnt/webserver/datadisk/resources/jdicarlo/SRR3493403_2.fastq
+primerFile = /mnt/webserver/datadisk/resources/jdicarlo/NA12878-194-genes-63-indels.10867.primers3.txt
