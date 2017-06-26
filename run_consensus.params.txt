@@ -2,11 +2,11 @@
 # tools
 cutadaptDir = /opt/conda/bin/
 bwaDir      = /opt/conda/bin/
-javaExe     = /opt/conda/jre/bin/java/
-samtoolsDir = /srv/qgen/bin/samtools-1.3.1/
+javaExe     = /opt/conda/jre/bin/java
+samtoolsDir = /srv/qgen/bin/samtools-1.5/bin/
 
 # Fulcrum Genomics tools
-fgbioJar = /mnt/webserver/datadisk/resources/jdicarlo/fgbio-0.1.4-SNAPSHOT.jar
+fgbioJar = /srv/qgen/bin/fgbio-0.1.4-SNAPSHOT.jar
 
 # ssw for fast Smith-Waterman
 sswPyFile = /srv/qgen/bin/ssw/src/ssw_wrap.py
