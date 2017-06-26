@@ -15,7 +15,7 @@ samtoolsMem = 2500M
 outputDetail = True
 
 # prep module - read preparation (common region trimming) params
-trimScript = /srv/qgen/runone_/prep_trim.py
+trimScript = /srv/qgen/code/qiaseq-dna/core/prep_trim.py
 
 # geneome file
 genomeFile = /srv/qgen/data/genome/ucsc.hg19.fa  ; this has some ALT mask hacks, but has NC_012920 instead of UCSC chrM (NC_001807)
@@ -55,8 +55,8 @@ bedRepeatMaskerSubset = /srv/qgen/data/annotation/SR_LC_SL_RepeatMasker.bed
 
 # parameters specific to a read set - one section per read set 
 [NEB_S2]
-readFile1 = /mnt/webserver/datadisk/resources/jdicarlo/NEB_S2_L001_R1_001.fastq.gz
-readFile2 = /mnt/webserver/datadisk/resources/jdicarlo/NEB_S2_L001_R2_001.fastq.gz
+readFile1 = /srv/qgen/example/NEB_S2_L001_R1_001.fastq.gz
+readFile2 = /srv/qgen/example/NEB_S2_L001_R2_001.fastq.gz
 primerFile = /srv/qgen/example/DHS-101Z.primers.txt
 roiBedFile = /srv/qgen/example/DHS-101Z.roi.bed
 
