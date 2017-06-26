@@ -1,9 +1,9 @@
 [general]
 # tools
-cutadaptDir = /srv/qgen/bin/cutadapt-1.10/
-bwaDir      = /srv/qgen/bin/bwa-0.7.15/
-samtoolsDir = /srv/qgen/bin/samtools-1.3.1/
-javaExe     = /srv/qgen/bin/jre1.8.0_92/bin/java
+cutadaptDir = /opt/conda/bin/
+bwaDir      = /opt/conda/bin/
+samtoolsDir = /srv/qgen/bin/samtools-1.5/bin/
+javaExe     = /opt/conda/jre/bin/java
 
 # ssw for fast Smith-Waterman
 sswPyFile = /srv/qgen/bin/ssw/src/ssw_wrap.py
@@ -49,7 +49,7 @@ mtDrop = 0
 maxMT = 0 
 primerDist = 2 
 threshold = 0
-bedtoolsPath = /srv/qgen/bin/bedtools-2.25.0/bin/
+bedtoolsPath = /opt/conda/bin/bedtools-2.25.0/bin/
 bedTandemRepeats      = /srv/qgen/data/annotation/simpleRepeat_TRF.bed
 bedRepeatMaskerSubset = /srv/qgen/data/annotation/SR_LC_SL_RepeatMasker.bed
 
