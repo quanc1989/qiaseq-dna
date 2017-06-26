@@ -523,13 +523,3 @@ def run(cfg,bamFileIn):
 
    # report completion
    print("umi_filter: done")
-   
-#-------------------------------------------------------------------------------------
-if __name__ == "__main__":
-   cfg = lambda:0
-   cfg.readSet = "NB500965_0048.NB965-48-1-2_S1"
-   cfg.primerFile = "/home/qiauser/primers.brca12-02.223.txt"
-   cfg.endogenousLenMin = 15
-   cfg.sswPyFile = "/srv/qgen/bin/ssw/src/ssw_wrap.py"
-   cfg.numCores = "32"
-   run(cfg, "umi_filter")

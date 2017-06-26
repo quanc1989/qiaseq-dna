@@ -1,5 +1,4 @@
 import sys
-sys.path.append("/srv/qgen/code/qiaseq-dna/")
 
 # our modules
 import core.run_log
@@ -10,6 +9,9 @@ import core.umi_filter
 import core.umi_mark
 import core.umi_merge
 import core.primer_clip
+import core.samtools
+import metrics.umi_frags
+import metrics.umi_depths
 import varcall.sm_counter_wrapper
 import varcall.vcf_complex
 import varcall.vcf_annotate
@@ -38,6 +40,8 @@ def run(readSet, paramFile):
    bamFileIn  = readSet + ".align.bam"
    core.umi_filter.run(cfg, bamFileIn)
    core.umi_mark.run(cfg)
+   metrics.umi_frags.run(cfg)
+   metrics.umi_depths.run(cfg)
    core.umi_merge.run(cfg, bamFileIn)
    
    # soft clip primer regions from read alignments

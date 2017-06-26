@@ -41,15 +41,4 @@ def run(cfg, readFile1, readFile2, bamFileOut):
             os.remove(readFile)
    
    # report completion
-   print("align: done creating bam file " + bamFileOut)
-   
-#-------------------------------------------------------------------------------------
-if __name__ == "__main__":
-   cfg = lambda:0
-   cfg.readSet = "NEB_S2"
-   cfg.genomeFile  = "/srv/qgen/data/genome/ucsc.hg19.fa"
-   cfg.bwaDir      = "/srv/qgen/bin/bwa-0.7.15/"
-   cfg.samtoolsDir = "/srv/qgen/bin/samtools-1.3.1/"
-   cfg.deleteLocalFiles = False
-   cfg.numCores = "32"
-   run(cfg, "prep", "align")
+   print("align: done aligning reads to genome, bam file: " + bamFileOut)

@@ -315,14 +315,10 @@ def vc(bamFile, chrom, pos, minBQ, minMQ, mtDepth, rpb, hpLen, mismatchThr, mtDr
    # pile up reads
    for read in samfile.pileup(region = chrom + ':' + pos + ':' + pos, truncate=True, max_depth=1000000, stepper='nofilter'):
       for pileupRead in read.pileups:
-         # read ID
-         qname = pileupRead.alignment.query_name
-         qnameSplit = qname.split(":")
-         readid = ':'.join(qnameSplit[:-2])
-         # barcode sequence
-         BC = qnameSplit[-2]
-         # duplex tag - temporary hack from end of readid - should be CC, TT, or NN for duplex runs
-         duplexTag = qnameSplit[-3]
+         # read id
+         readid = pileupRead.alignment.query_name
+         # unique molecule index
+         BC = pileupRead.alignment.get_tag("Mi")
          # mapping quality
          mq = pileupRead.alignment.mapping_quality
          # get NM tag 
@@ -355,10 +351,10 @@ def vc(bamFile, chrom, pos, minBQ, minMQ, mtDepth, rpb, hpLen, mismatchThr, mtDr
          # calculate mismatch per 100 bases
          mismatchPer100b = 100.0 * mismatch / readLen if readLen > 0 else 0.0
 
-         # paired read
-         if pileupRead.alignment.is_read1:
-            pairOrder = 'R1'
+         # paired read  (NOTE: code was developed with SPE primer on R2 side, final product uses R1 side)
          if pileupRead.alignment.is_read2:
+            pairOrder = 'R1'
+         if pileupRead.alignment.is_read1:
             pairOrder = 'R2'
 
          # +/- strand

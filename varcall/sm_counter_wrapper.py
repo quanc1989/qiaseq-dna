@@ -3,28 +3,11 @@ import ConfigParser
 # our modules
 import sm_counter
 
+#---------------------------------------------------------------------------------
 def run(cfg, paramFile):
    # get read set name
    readSet = cfg.readSet
 
-   # get mean base-level MT depth from disk (needed for smCounter)
-   mtDepthMean = None
-   for line in open(readSet + ".sumUniformityBase.summary.txt","r"):
-      (metricVal,metricName) = line.strip().split("\t")
-      if metricName == "mean MT depth":
-         mtDepthMean = int(round(float(metricVal)))
-
-   # get reads per MT from disk (needed for smCounter)
-   numReadsPerMt = None
-   for line in open(readSet + ".sumPrimerMts.summary.txt","r"):
-      (metricVal,metricName) = line.strip().split("\t")
-      if metricName == "read fragments per MT, mean":
-         numReadsPerMt = int(round(float(metricVal)))
-         
-   # debug check
-   if mtDepthMean == None or numReadsPerMt == None:
-      raise Exception("could not find mean MT depth or RPMT on disk!")
-      
    # get standard smCounter parameters from the main run-params.txt file
    parser = ConfigParser.SafeConfigParser()
    parser.optionxform = str
@@ -37,8 +20,8 @@ def run(cfg, paramFile):
    cfgSmCounter["outPrefix"] = readSet
    cfgSmCounter["bamFile"  ] = readSet + ".bam"
    cfgSmCounter["bedTarget"] = cfg.roiBedFile
-   cfgSmCounter["mtDepth"  ] = mtDepthMean
-   cfgSmCounter["rpb"      ] = numReadsPerMt
+   cfgSmCounter["mtDepth"  ] = cfg.umiDepthMean # this comes from metrics.umi_depths module
+   cfgSmCounter["rpb"      ] = cfg.readsPerUmi  # this comes from metrics.umi_frags module
    cfgSmCounter["nCPU"     ] = cfg.numCores
    cfgSmCounter["refGenome"] = cfg.genomeFile
    
