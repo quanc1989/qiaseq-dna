@@ -299,7 +299,7 @@ def run(cfg, bamFileIn, vcfFileIn, vcfFileOut):
          numVariantsCalled += 1
 
    # write count of variants output (used for pipeline integration)
-   fileout = open(cfg.readSet + ".vcfComplex.summary.txt","w")
+   fileout = open(cfg.readSet + ".vcf_complex.summary.txt","w")
    fileout.write("{}\tvariants called by smCounter\n".format(numVariantsCalled))
    fileout.close()
 

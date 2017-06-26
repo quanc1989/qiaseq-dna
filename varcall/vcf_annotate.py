@@ -14,10 +14,10 @@ def run(cfg, vcfFileIn, vcfFileOut):
    cosmicFile  = cfg.cosmicFile
    clinVarFile = cfg.clinVarFile
    readSet     = cfg.readSet
-   logFile = readSet + ".snpEffSift.log"
+   logFile = readSet + ".vcf_annotate.snpEffSift.log"
       
    # snpEff eff (NOTE: removed the "-t" option for multi-thread operation, due to multiple customer cases of "java.util.ConcurrentModificationException")
-   print("starting snpEff eff...")
+   print("vcf_annotate: starting snpEff eff...")
    cmd = javaExe + " -Xmx6G" \
    + " -jar " + snpEffPath + "snpEff.jar " \
    + " -c " + snpEffConfig \
@@ -29,7 +29,7 @@ def run(cfg, vcfFileIn, vcfFileOut):
    subprocess.check_call(cmd, shell=True)
 
    # add dbSNP 
-   print("starting snpSift annoate dbSNP...")
+   print("vcf_annotate: starting snpSift annoate dbSNP...")
    cmd = javaExe + " -Xmx6G" \
    + " -jar " + snpEffPath + "SnpSift.jar annotate" \
    + " -c " + snpEffConfig \
@@ -40,7 +40,7 @@ def run(cfg, vcfFileIn, vcfFileOut):
    subprocess.check_call(cmd, shell=True)
 
    # add cosmic
-   print("starting snpSift annoate Cosmic...")
+   print("vcf_annotate: starting snpSift annoate Cosmic...")
    cmd = javaExe + " -Xmx6G" \
    + " -jar " + snpEffPath + "SnpSift.jar annotate" \
    + " -c " + snpEffConfig \
@@ -51,7 +51,7 @@ def run(cfg, vcfFileIn, vcfFileOut):
    subprocess.check_call(cmd, shell=True)
    
    # add clinvar
-   print("starting snpSift annoate ClinVar...")
+   print("vcf_annotate: starting snpSift annoate ClinVar...")
    cmd = javaExe + " -Xmx6G" \
    + " -jar " + snpEffPath + "SnpSift.jar annotate" \
    + " -c " + snpEffConfig \

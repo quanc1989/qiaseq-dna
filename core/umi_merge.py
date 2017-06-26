@@ -12,7 +12,6 @@ def run(cfg,bamFileIn):
    tagNamePrimer    = cfg.tagNamePrimer
    tagNameResample  = cfg.tagNameResample
    samtoolsDir      = cfg.samtoolsDir
-   samtoolsMem      = cfg.samtoolsMem
    deleteLocalFiles = cfg.deleteLocalFiles
    numCores         = cfg.numCores
 
@@ -26,25 +25,15 @@ def run(cfg,bamFileIn):
    # save BAM header into output file
    cmd = samtoolsDir + "samtools view -H " \
    + bamFileIn \
-   + " 1> " + readSet + ".umi_merge.temp1.sam" \
+   + " 1> " + readSet + ".umi_merge.temp2.sam" \
    + " 2>>" + readSet + ".umi_merge.shell.log"
    subprocess.check_call(cmd, shell=True)
    
-   # sort original BAM file by readId, using Linux sort (NOT samtools sort -n !!!)
-   #cmd = samtoolsDir + "samtools view" \
-   #+ " -@ " + numCores  \
-   #+ " " + bamFileIn \
-   #+ " | sort -k1,1 -T./ --parallel=" + numCores \
-   #+ " 1> " + readSet + ".umi_merge.temp0.sam" \
-   #+ " 2>>" + readSet + ".umi_merge.shell.log" 
-   #subprocess.check_call(cmd, shell=True)
-   #print("umi_merge: done sorting SAM by read id")
-   
-   # convert BAM to SAM, to enable more parallel Linux gnu sort on large files (at the expense of more disk I/O)
+   # convert BAM to SAM, rather than use pipe, to enable more parallel Linux gnu sort on very large files (at the expense of more disk I/O)
    cmd = samtoolsDir + "samtools view " \
    + " -@ " + numCores  \
    + "    " + bamFileIn \
-   + " >  " + readSet + ".umi_merge.temp9.sam" \
+   + " >  " + readSet + ".umi_merge.temp0.sam" \
    + " 2>>" + readSet + ".umi_merge.shell.log"
    subprocess.check_call(cmd, shell=True)
    print("umi_merge: done converting input BAM to SAM")
@@ -53,19 +42,19 @@ def run(cfg,bamFileIn):
    if deleteLocalFiles and len(os.path.dirname(bamFileIn)) == 0:
       os.remove(bamFileIn)
       
-   # sort original BAM file by readId, using Linux sort (NOT samtools sort -n !!!)
+   # sort original BAM file by readId, using Linux sort (NOT samtools sort -n !!!) (could use sambamba instead)
    cmd = "sort -k1,1 -T./ --parallel=" + numCores \
-   + " "     + readSet + ".umi_merge.temp9.sam" \
-   + " 1>> " + readSet + ".umi_merge.temp0.sam" \
+   + " "     + readSet + ".umi_merge.temp0.sam" \
+   + " 1>> " + readSet + ".umi_merge.temp1.sam" \
    + " 2>> " + readSet + ".umi_merge.shell.log"
    subprocess.check_call(cmd, shell=True)
    print("umi_merge: done sorting SAM by read id")
-   os.remove(readSet + ".umi_merge.temp9.sam")
+   os.remove(readSet + ".umi_merge.temp0.sam")
    
    # open SAM files, init read counters
    fileout = open(readSet + ".umi_merge.primers.txt","w")
-   samIn   = open(readSet + ".umi_merge.temp0.sam", "r")
-   samOut  = open(readSet + ".umi_merge.temp1.sam", "a")  # note this is an append, because header already written
+   samIn   = open(readSet + ".umi_merge.temp1.sam", "r")
+   samOut  = open(readSet + ".umi_merge.temp2.sam", "a")  # note this is an append, because header already written
    numReadsUmiFile = 0
    numReadsSamFile = 0
 
@@ -119,7 +108,7 @@ def run(cfg,bamFileIn):
    samIn.close()
    samOut.close()
    print("umi_merge: done merging unique molecule tag to sam file")
-   os.remove(readSet + ".umi_merge.temp0.sam")
+   os.remove(readSet + ".umi_merge.temp1.sam")
       
    # debug check - make sure all reads found
    if numReadsSamFile != 2 * numReadsUmiFile:
@@ -128,22 +117,9 @@ def run(cfg,bamFileIn):
    # convert final file to BAM (not really necessary)
    cmd = samtoolsDir + "samtools view -1" \
    + " -@ " + numCores  \
-   + "    " + readSet + ".umi_merge.temp1.sam" \
+   + "    " + readSet + ".umi_merge.temp2.sam" \
    + " 1> " + readSet + ".umi_merge.bam" \
    + " 2>>" + readSet + ".umi_merge.shell.log" 
    subprocess.check_call(cmd, shell=True)
    print("umi_merge: done converting SAM to BAM")
-   os.remove(readSet + ".umi_merge.temp1.sam")
-      
-#-------------------------------------------------------------------------------------
-if __name__ == "__main__":
-   cfg = lambda:0
-   cfg.readSet = "NEB_S2"
-   cfg.samtoolsDir      = "/srv/qgen/bin/samtools-1.3.1/"
-   cfg.samtoolsMem      = "2500M"
-   cfg.deleteLocalFiles = False
-   cfg.numCores         = "32"
-   bamFileIn  = cfg.readSet + ".align.bam"
-   bamFileOut = cfg.readSet + ".umi.bam"
-   run(cfg,bamFileIn,samFileOut)
-   
+   os.remove(readSet + ".umi_merge.temp2.sam")

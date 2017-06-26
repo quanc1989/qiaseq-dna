@@ -1,5 +1,4 @@
 import sys
-sys.path.append("/srv/qgen/code/qiaseq-dna/")
 
 # our modules
 import core.run_log

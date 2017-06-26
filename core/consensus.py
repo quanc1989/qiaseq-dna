@@ -15,48 +15,27 @@ def run(cfg,bamFileIn,primerFileIn):
    javaExe          = cfg.javaExe
    fgbioJar         = cfg.fgbioJar
    samtoolsDir      = cfg.samtoolsDir
+   samtoolsMem      = cfg.samtoolsMem
+   numCores         = cfg.numCores
    genomeFile       = cfg.genomeFile
    deleteLocalFiles = cfg.deleteLocalFiles
-   numCores         = cfg.numCores
    tagNameUmi       = cfg.tagNameUmi
 
-   # save header
-   cmd = samtoolsDir + "samtools view -H " \
-   + bamFileIn \
-   + " 1> " + readSet + ".consensus.temp0.sam" \
-   + " 2> " + readSet + ".consensus.shell.log"
+   # sort the BAM file by column 12 (the "Mi" unique molecule identifier tag)
+   cmd = samtoolsDir + "samtools sort"  \
+   + " -m " + samtoolsMem \
+   + " -@ " + numCores \
+   + " -T " + readSet \
+   + " -t " + tagNameUmi \
+   + " -o " + readSet + ".consensus.temp0.bam" \
+   + "    " + bamFileIn \
+   + " >> " + readSet + ".consensus.shell.log 2>&1"
    subprocess.check_call(cmd, shell=True)
-
-   # Linux sort the BAM file by column 12 (the "Mi" unique molecule identifier tag), append to SAM header
-   ###cmd = samtoolsDir + "samtools view " \
-   ###+ bamFileIn  \
-   ###+ " | sort -k12,12 -T./ --parallel=" + numCores \
-   ###+ " 1>> " + readSet + ".consensus.temp0.sam" \
-   ###+ " 2>> " + readSet + ".consensus.shell.log"
-   ###subprocess.check_call(cmd, shell=True)
-   ###print("consensus: done sorting SAM by UMI tag")
-   
-   # convert BAM to SAM, to enable more parallel Linux gnu sort on large files (at the expense of more disk I/O)
-   cmd = samtoolsDir + "samtools view " \
-   + " -@ " + numCores  \
-   + "    " +  bamFileIn \
-   + " >  " + readSet + ".consensus.temp9.sam" \
-   + " 2>>" + readSet + ".consensus.shell.log"
-   subprocess.check_call(cmd, shell=True)
-   print("consensus: done converting input BAM to SAM")
+   print("consensus: done sorting BAM by 'Mi' tag")
    
    # remove input SAM if it is a local file
    if deleteLocalFiles and len(os.path.dirname(bamFileIn)) == 0:
       os.remove(bamFileIn)
-
-   # Linux sort the BAM file by column 12 (the "Mi" unique molecule identifier tag), append to SAM header
-   cmd = "sort -k12,12 -T./ --parallel=" + numCores \
-   + " "     + readSet + ".consensus.temp9.sam" \
-   + " 1>> " + readSet + ".consensus.temp0.sam" \
-   + " 2>> " + readSet + ".consensus.shell.log"
-   subprocess.check_call(cmd, shell=True)
-   print("consensus: done sorting SAM by UMI tag")
-   os.remove(readSet + ".consensus.temp9.sam")
    
    # call Fulcrum Genomics consensus reads using fgbio CallMolecularConsensusReads
    cmd = javaExe + " -jar " \
@@ -64,14 +43,14 @@ def run(cfg,bamFileIn,primerFileIn):
    + " -Dsamjdk.use_async_io_read_samtools=true" \
    + " -Dsamjdk.compression_level=1 " \
    + fgbioJar + " CallMolecularConsensusReads" \
-   + " -i " + readSet + ".consensus.temp0.sam" \
+   + " -i " + readSet + ".consensus.temp0.bam" \
    + " -o " + readSet + ".consensus.temp1.bam" \
    + " --min-reads=2 --min-input-base-quality=25 -1 40 -2 40 -D -S unsorted " \
    + " --tag=" + tagNameUmi \
    + " > " + readSet + ".consensus.CallMolecularConsensusReads.log 2>&1"
    subprocess.check_call(cmd, shell=True)
    print("consensus: done with fgbio CallMolecularConsensusReads")
-   os.remove(readSet + ".consensus.temp0.sam")
+   os.remove(readSet + ".consensus.temp0.bam")
    
    # add @RG SM tag to header (bug in CallMolecularConsensusReads!!!)
    cmd = samtoolsDir + "samtools view -H " \

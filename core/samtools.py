@@ -17,7 +17,7 @@ def sort(cfg,bamFileIn,bamFileOut):
    + " -T " + readSet \
    + " -o " + bamFileOut \
    + "    " + bamFileIn \
-   + " >> " + readSet + ".samtools.shell.log"
+   + " >> " + readSet + ".samtools.shell.log 2>&1"
    subprocess.check_call(cmd, shell=True)
    
    # index

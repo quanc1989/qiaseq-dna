@@ -1,11 +1,11 @@
 import sys
-sys.path.append("/srv/qgen/code/qiaseq-dna/")
 
 # our modules
-import run_log
-import run_config
-import prep
-import align
+import core.run_log
+import core.run_config
+import core.prep
+import core.align
+import core.dedup
 
 #--------------------------------------------------------------------------------------
 # trim common regions, align to genome, remove PCR duplicates
@@ -13,22 +13,27 @@ import align
 def run(readSet, paramFile):
 
    # initialize logger
-   run_log.init(readSet)
+   core.run_log.init(readSet)
 
    # read run configuration file to memory
-   cfg = run_config.run(readSet,paramFile)
+   cfg = core.run_config.run(readSet,paramFile)
 
    # trim 3' ends of both reads, and extract UMI sequence
-   prep.run(cfg)
+   core.prep.run(cfg)
    
    # align trimmed reads to genome using BWA MEM
    readFileIn1 = readSet + ".prep.R1.fastq"
    readFileIn2 = readSet + ".prep.R2.fastq"
    bamFileOut  = readSet + ".align.bam"
-   align.run(cfg, readFileIn1, readFileIn2, bamFileOut)
+   core.align.run(cfg, readFileIn1, readFileIn2, bamFileOut)
+   
+   # run Picard MarkDuplicates
+   bamFileIn  = readSet + ".align.bam"
+   bamFileOut = readSet + ".dedup.bam"
+   core.dedup.run(cfg,bamFileIn,bamFileOut)
    
    # close log file
-   run_log.close()
+   core.run_log.close()
    
 #-------------------------------------------------------------------------------------
 # main program for running from shell 
