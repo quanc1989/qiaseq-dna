@@ -37,7 +37,7 @@ docker run -it -v /home/your_fav_dir/:/mnt/qiaseq-run/ rpadmanabhan9/qiaseq-dna
 
 ### Change directory and get the latest code from github
 cd /srv/qgen/code/
-git clone https://qiauser:pass1234@github.com/qiaseq/qiaseq-dna.git
+git clone https://qiauser:anz2teu@github.com/qiaseq/qiaseq-dna.git
 
 ### Change to run directory and copy over parameters file
 cd /mnt/qiaseq-run/
