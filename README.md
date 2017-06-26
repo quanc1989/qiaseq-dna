@@ -41,7 +41,7 @@ git clone https://qiauser:anz2teu@github.com/qiaseq/qiaseq-dna.git
 
 ### Change to run directory and copy over parameters file
 cd /mnt/qiaseq-run/
-cp /srv/qgen/code/run_consensus.params.txt ./
+cp /srv/qgen/code/qiaseq-dna/run_consensus.params.txt ./
 
 ### Edit the bottom of run_consensus.params.txt if you need to change the read set and primer file
 
