@@ -29,9 +29,25 @@ Docker image for third-party dependencies
 The python modules in this repository have many dependencies on third-party NGS software (e.g. BWA, samtools, etc.) and GNU Linux utilities (sort, zcat, etc).  Please **DO NOT ATTEMPT** to use the python modules in this git repository without first running the code on the example read set using our Docker image:
 
 ```bash
-docker pull rpadmanabhan9/d11f09712ba2 
+### Pull the docker image
+docker pull rpadmanabhan9/qiaseq-dna
 
-docker run python /srv/qgen/code/qiaseq-dna/run/run_consensus.py NEB_S2 > run.log 2>&1
+### Run a container from the image above interactively, mounting your run directory i.e. directory where the output files will be created
+docker run -it -v /home/your_fav_dir/:/mnt/qiaseq-run/ rpadmanabhan9/qiaseq-dna
+
+### Change directory and get the latest code from github
+cd /srv/qgen/code/
+git clone https://qiauser:anz2teu@github.com/qiaseq/qiaseq-dna.git
+
+### Change to run directory and copy over parameters file
+cd /mnt/qiaseq-run/
+cp /srv/qgen/code/run_consensus.params.txt ./
+
+### Edit the bottom of run_consensus.params.txt if you need to change the read set and primer file
+
+### Run the pipeline
+python /srv/qgen/code/qiaseq-dna/run_consensus.py  NEB_S2 run_consensus.params.txt  > run.log 2>&1 &  
+
 ```
 The dependencies are fully documented in the Dockerfile in this repository.
 
