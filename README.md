@@ -30,10 +30,10 @@ The python modules in this repository have many dependencies on third-party NGS 
 
 ```bash
 ### Pull the docker image
-docker pull rpadmanabhan9/qiaseq-dna
+sudo docker pull rpadmanabhan9/qiaseq-dna
 
 ### Run a container from the image above interactively, mounting your run directory i.e. directory where the output files will be created
-docker run -it -v /home/your_fav_dir/:/mnt/qiaseq-run/ rpadmanabhan9/qiaseq-dna
+sudo docker run -it -v /home/your_fav_dir/:/mnt/qiaseq-run/ rpadmanabhan9/qiaseq-dna
 
 ### Change directory and get the latest code from github
 cd /srv/qgen/code/
@@ -51,4 +51,5 @@ python /srv/qgen/code/qiaseq-dna/run_consensus.py  NEB_S2 run_consensus.params.t
 ```
 The dependencies are fully documented in the Dockerfile in this repository.
 
+Please address questions to raghavendra.padmanabhan@qiagen.com, with CC to john.dicarlo@qiagen.com.
 
