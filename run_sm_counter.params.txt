@@ -49,7 +49,7 @@ mtDrop = 0
 maxMT = 0 
 primerDist = 2 
 threshold = 0
-bedtoolsPath = /opt/conda/bin/bedtools-2.25.0/bin/
+bedtoolsPath = /opt/conda/bin/
 bedTandemRepeats      = /srv/qgen/data/annotation/simpleRepeat_TRF.bed
 bedRepeatMaskerSubset = /srv/qgen/data/annotation/SR_LC_SL_RepeatMasker.bed
 
