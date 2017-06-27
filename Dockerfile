@@ -62,6 +62,8 @@ RUN wget https://github.com/samtools/samtools/releases/download/1.5/samtools-1.5
 ADD https://storage.googleapis.com/qiaseq-dna/data/genome/ucsc.hg19.dict https://storage.googleapis.com/qiaseq-dna/data/genome/ucsc.hg19.fa.gz /srv/qgen/data/genome/
 RUN cd /srv/qgen/data/genome && \
     gunzip ucsc.hg19.fa.gz  && \
+    ## Index the fasta using samtools
+    /srv/qgen/bin/samtools-1.5/bin/samtools faidx /srv/qgen/data/genome/ucsc.hg19.fa && \ 
     ## Run bwa to generate index files 
     /opt/conda/bin/bwa index /srv/qgen/data/genome/ucsc.hg19.fa
     
