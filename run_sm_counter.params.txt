@@ -34,7 +34,7 @@ vcfComplexGapMax = 3
 
 # variant annotation
 snpEffPath   = /opt/conda/share/snpeff-4.2-0/
-snpEffConfig = /srv/qgen/data/snpEff/snpEff.config
+snpEffConfig = /opt/conda/share/snpeff-4.2-0/snpEff.config
 dbSnpFile    = /srv/qgen/data/annotation/common_all_20160601.vcf.gz
 cosmicFile   = /srv/qgen/data/annotation/CosmicAllMuts_v69_20140602.vcf.gz
 clinVarFile  = /srv/qgen/data/annotation/clinvar_20160531.vcf.gz
