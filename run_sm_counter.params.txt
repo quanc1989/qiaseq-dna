@@ -33,7 +33,7 @@ tagNameResample = re
 vcfComplexGapMax = 3
 
 # variant annotation
-snpEffPath   = /srv/qgen/bin/snpEff-4.2/
+snpEffPath   = /opt/conda/share/snpeff-4.2-0/
 snpEffConfig = /srv/qgen/data/snpEff/snpEff.config
 dbSnpFile    = /srv/qgen/data/annotation/common_all_20160601.vcf.gz
 cosmicFile   = /srv/qgen/data/annotation/CosmicAllMuts_v69_20140602.vcf.gz
