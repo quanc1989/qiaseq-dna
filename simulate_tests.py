@@ -1,8 +1,6 @@
 from tests import test_sm_counter
-from tests import test_consensus_calling
-from tests import duplicate_removal 
-from tests import utils
-
+import tests.utils
+import os
 
 
 #################################################################################################
@@ -16,11 +14,11 @@ from tests import utils
 ##                                                                                             ##
 ##         This test suite should be run inside a docker container with the example readset    ##
 ##         Key metrics from the pipeline pertaining to variant calling, umi statistics         ##
-##         will be used to validate whether the test was successful                            ## 
+##         will be used to validate whether the test was successful                            ##
 #################################################################################################
 ## To do :
 ##   1. Have a cleaner  way to initialize the test directories
-##   2. Complete consensus and duplicate tests 
+##   2. Complete consensus and duplicate tests
 
 
 ## Run this test as follows :
@@ -29,18 +27,21 @@ from tests import utils
 
 
 ########## smCounter ##########
+print "Starting to run tests.......\n------------------"
 ## Setup directory structure
 os.system("mkdir -p /mnt/qiaseq-run/test_sm_counter/")
 os.system("cd /mnt/qiaseq-run/test_sm_counter/")
 os.system("cp /srv/qgen/code/qiaseq-dna/run_sm_counter.params.txt ./")
-## Run tests
+# Run tests
+print "Running sm_counter pipeline\n"
 test_sm_counter.run_pipeline()
 test_sm_counter.validate_umi_depth_metrics("NEB_S2.umi_depths.summary.txt")
 test_sm_counter.validate_umi_read_frags_metrics("NEB_S2.umi_frags.summary.txt")
 test_sm_counter.validate_umi_filter_metrics("NEB_S2.umi_filter.summary.txt")
 test_sm_counter.validate_variant_calling_metrics("NEB_S2.vcf_complex.summary.txt")
+print "Passed all sm_counter tests\n------------------"
 ########## Consensus Calling ##########
 ## switch to consensus dir
-## run tests 
+## run tests
 
 ########## Duplicate Removal ##########
