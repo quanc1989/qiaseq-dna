@@ -23,7 +23,7 @@ RUN apt-get -y update && \
     apt-get -y install r-base
 
 ################ Install various version specific 3rd party tools ################
-RUN conda install bedtools=2.25.0 htslib=1.3.1 cutadapt=1.10 picard=1.97 snpeff=4.2 bwa=0.7.15
+RUN conda install bedtools=2.25.0 htslib=1.5 cutadapt=1.10 picard=1.97 snpeff=4.2 bwa=0.7.15 
 
 ################ Install python modules ################
 ## Install some modules with conda
@@ -46,16 +46,6 @@ RUN cd /srv/qgen/bin/ && \
 ################ Update openjdk ################
 ## note : picard gets updated to match jdk version
 RUN conda install -c cyclus java-jdk=8.45.14
-
-################ Add latest samtools version for sort by Tag feature ################
-RUN wget https://github.com/samtools/samtools/releases/download/1.5/samtools-1.5.tar.bz2 -O /srv/qgen/bin/downloads/samtools-1.5.tar.bz2 && \
-    cd /srv/qgen/bin/downloads/ && \
-    tar -xvf samtools-1.5.tar.bz2 && \
-    cd samtools-1.5  && \
-    mkdir -p /srv/qgen/bin/samtools-1.5 && \
-    ./configure --prefix /srv/qgen/bin/samtools-1.5 && \
-    make && \
-    make install 
 
 ################ Add data directory ################
 ## Download genome files
