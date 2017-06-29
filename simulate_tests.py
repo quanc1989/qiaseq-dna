@@ -23,14 +23,14 @@ import os
 
 ## Run this test as follows :
 ## sudo docker pull rpadmanabhan9/qiaseq-dna
-## sudo docker run -v /home/your_fav_dir:/mnt/qiaseq-run/ rpadmanabhan9/qiaseq-dna /bin/bash -c "cd /srv/qgen/code/; git clone https://qiauser:anz2teu@github.com/qiaseq/qiaseq-dna.git; cd /mnt/qiaseq-run/; python /srv/qgen/code/qiaseq-dna/simulate_tests.py;" 
+## sudo docker run -v /home/your_fav_dir:/mnt/qiaseq-run/ rpadmanabhan9/qiaseq-dna /bin/bash -c "cd /srv/qgen/code/; git clone https://qiauser:anz2teu@github.com/qiaseq/qiaseq-dna.git; cd qiaseq-dna; python simulate_tests.py;"
 
 
 ########## smCounter ##########
 print "Starting to run tests.......\n------------------"
 ## Setup directory structure
 os.system("mkdir -p /mnt/qiaseq-run/test_sm_counter/")
-os.system("cd /mnt/qiaseq-run/test_sm_counter/")
+os.chdir("/mnt/qiaseq-run/test_sm_counter/")
 os.system("cp /srv/qgen/code/qiaseq-dna/run_sm_counter.params.txt ./")
 # Run tests
 print "Running sm_counter pipeline\n"
