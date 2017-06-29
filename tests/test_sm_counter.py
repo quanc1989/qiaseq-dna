@@ -33,41 +33,48 @@ def run_pipeline():
     The command : \n %s \n exited with non zero return code.
     Please check the logs ! """
 
-def validate_umi_depth_metrics():
+def validate_umi_depth_metrics(metrics_file):
     """ Validate depth related umi metrics 
+
+    metrics_file : str ; path to the metrics file 
     """
     
     ## Parse the values from the summary file first
-    metrics = utils.parse_summary_file("NEB_S2.umi_depths.summary.txt")
+    metrics = utils.parse_summary_file(metrics_file)
     ## Check values
     assert utils.compare_with_tolerance(metrics["mean UMI depth"],MEAN_UMI_DEPTH,0.02) is True
     assert utils.compare_with_tolerance(metrics["mean read depth"],MEAN_READ_DEPTH,0.02) is True
     
-def validate_umi_read_frags_metrics():
+def validate_umi_read_frags_metrics(metrics_file):
     """ Validate metrics related to read frags and umi
+
+    metrics_file : str ; path to the metrics file 
     """
 
     ## Parse the values from the summary file first
-    metrics = utils.parse_summary_file("NEB_S2.umi_frags.summary.txt")
+    metrics = utils.parse_summary_file(metrics_file)
     assert utils.compare_with_tolerance(metrics["UMIs"],UMIs,0.02) is True 
     assert utils.compare_with_tolerance(metrics["read fragments per MT, mean"],READS_PER_MT,0.02) is True
     assert utils.compare_with_tolerance(metrics["% of reads from internal downstream priming"],READS_FROM_INTERNAL_DOWNSTREAM_PRIMING,0.02) is True
-
     
-def validate_umi_filter_metrics():
+def validate_umi_filter_metrics(metrics_file):
     """ Validate metrics related to how the reads were filtered
+
+    metrics_file : str ; path to the metrics file 
     """
 
     ## Parse the values from the summary file first
-    metrics = utils.parse_summary_file("NEB_S2.umi_filter.summary.txt")
+    metrics = utils.parse_summary_file(metrics_file)
     assert utils.compare_with_tolerance(metrics["read fragments dropped, R1 or R2 not mapped"],READS_DROPPED_R1_R2_UNMAPPED,0.02) is True
     assert utils.compare_with_tolerance(metrics["read fragments dropped, not passing mapping filters (low mapq, split alignments, discordant pairs, etc.)"],READS_DROPPED_MAPPING_FILTERS,0.02) is True
     assert utils.compare_with_tolerance(metrics["read fragments dropped, off target"],READS_DROPPED_OFF_TARGET,0.02) is True
     
-def validate_variant_calling_metrics():
+def validate_variant_calling_metrics(metrics_file):
     """ Validate metrics related 
+    
+    metrics_file : str ; path to the metrics file 
     """
     
     ## Parse the values from the summary file first
-    metrics = utils.parse_summary_file("NEB_S2.vcf_complex.summary.txt")
+    metrics = utils.parse_summary_file(metrics_file)
     assert utils.compare_with_tolerance(metrics["variants called by smCounter"],VARIANTS_CALLED,0) is True

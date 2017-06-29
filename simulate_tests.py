@@ -35,10 +35,10 @@ os.system("cd /mnt/qiaseq-run/test_sm_counter/")
 os.system("cp /srv/qgen/code/qiaseq-dna/run_sm_counter.params.txt ./")
 ## Run tests
 test_sm_counter.run_pipeline()
-test_sm_counter.validate_umi_depth_metrics()
-test_sm_counter.validate_umi_read_frags_metrics()
-test_sm_counter.validate_umi_filter_metrics()
-test_sm_counter.validate_variant_calling_metrics()
+test_sm_counter.validate_umi_depth_metrics("NEB_S2.umi_depths.summary.txt")
+test_sm_counter.validate_umi_read_frags_metrics("NEB_S2.umi_frags.summary.txt")
+test_sm_counter.validate_umi_filter_metrics("NEB_S2.umi_filter.summary.txt")
+test_sm_counter.validate_variant_calling_metrics("NEB_S2.vcf_complex.summary.txt")
 ########## Consensus Calling ##########
 ## switch to consensus dir
 ## run tests 
