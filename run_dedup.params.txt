@@ -2,7 +2,7 @@
 # tools
 cutadaptDir = /opt/conda/bin/
 bwaDir      = /opt/conda/bin/
-samtoolsDir = /srv/qgen/bin/samtools-1.5/bin/
+samtoolsDir = /opt/conda/bin/
 javaExe     = /opt/conda/jre/bin/java
 picardJar   = /opt/conda/share/picard-2.9.2-1/picard.jar
 
