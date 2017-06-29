@@ -2,7 +2,7 @@
 # tools
 cutadaptDir = /opt/conda/bin/
 bwaDir      = /opt/conda/bin/
-samtoolsDir = /opt/conda/bin/
+samtoolsDir = /srv/qgen/bin/samtools-1.5/bin/
 javaExe     = /opt/conda/jre/bin/java
 
 # ssw for fast Smith-Waterman
