@@ -118,7 +118,7 @@ def run(cfg):
       # add metrics
       metrics = linesOut[idxFragLen]
       if metrics == None:
-         metrix = [0 for x in range(6)]
+         metrics = [0 for x in range(6)]
       outvec.extend(metrics)
       
       # write to disk
