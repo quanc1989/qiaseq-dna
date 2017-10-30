@@ -63,8 +63,10 @@ def splitReadFile(readFile,filePrefixOut,readSide,numBatchesMax,deleteLocalFiles
          batchNum += 1
 
    # close out last batch
-   fileOut.close()
-   numBatches = batchNum + 1
+   if numLinesOut != 0:
+      fileOut.close()
+      batchNum += 1
+   numBatches = batchNum
    
    # delete local input file if no longer needed
    if deleteLocalFiles and len(os.path.dirname(readFile)) == 0:
