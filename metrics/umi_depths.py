@@ -170,7 +170,7 @@ def getDepthsInRoi(bedTarget,depthFile):
             
          # set up next ROI region - spin bedgraph backward
          else:
-            while locR_ >= locR and chrom_ == chrom:
+            while locR_ >= locR and chrom_ == chrom and idx > 0:
                idx -= 1
                (chrom_, locL_, locR_, umiDepth) = bedgraphDepthsAll[idx]
             break
