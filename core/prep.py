@@ -132,6 +132,10 @@ def run(cfg):
    # debug check
    if numReads2 != numReads1:
       raise UserWarning("prep: R1 and R2 read count not equal!")
+      
+   # debug check
+   if numReads1 == 0:
+      raise UserWarning("prep: input read files are empty!")
 
    # set up trimming work to be run in parallel sub-processes, using another python script
    workIn = []
