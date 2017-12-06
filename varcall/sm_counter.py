@@ -885,12 +885,6 @@ def main(args):
          shortLine = '\t'.join((CHROM, POS,     REF, ALT, TYPE, DP, MT, UMT, PI, THR, VMT, VMF, VSM, FILTER)) + '\n' 
          outVcf.write(vcfLine)
          outVariants.write(shortLine)
-         
-         # debug counter for summary
-         if TYPE == 'SNP':
-            numCalledSnps   = 0
-         else:
-            numCalledIndels = 0
 
    outVcf.close()
    outAll.close()
