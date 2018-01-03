@@ -1,7 +1,6 @@
 import luigi
 import sys
 import os
-
 # our modules
 import core.run_log
 import core.run_config
@@ -17,6 +16,10 @@ import metrics.umi_depths
 import varcall.sm_counter_wrapper
 import varcall.vcf_complex
 import varcall.vcf_annotate
+
+
+## To Do:
+## 1. Add param for output directory
 
 class config(luigi.Config):
     ''' Map config file variables into class attributes
@@ -69,43 +72,243 @@ class smcounter(luigi.Config):
 cfg = config()
 for param,val in smcounter().__dict__['param_kwargs'].items():
     setattr(cfg,param,val)
-    
+
+class MyExtTask(luigi.ExternalTask):
+    ''' Checks whether the file specified exists on disk
+    '''
+    file_loc = luigi.Parameter()
+    def output(self):
+        return luigi.LocalTarget(self.file_loc)
+
+
 class TrimReads(luigi.Task):
     ''' Trim 3' ends of both reads, and extract UMI sequence
     '''
-
+    # Parameters
+    samplesCfg = luigi.Parameter(description="Config file containing information on readSet to run")
+    readSet = luigi.Parameter(description="The readSet to analyze from the config file above")
+    
+    def __init__(self,*args,**kwargs):
+        '''
+        '''
+        super(self.__class__.__name__,self).__init__(*args,**kwargs)
+        currentDir = os.path.dirname(os.path.realpath(__file__))
+        verificationDir = os.path.join(currentDir,"verification")
+        self.verificationFile = os.path.join(verificationDir,
+                                             self.__class__.__name__+'.verification.txt')
+        
+    def requires(self):
+        '''
+        '''
+        return MyExtTask(cfg.readFile1)
+    
+    def run(self):
+        '''
+        '''
+        core.prep.run(cfg)
+        with open(self.verificationFile,'w') as OUT:
+            OUT.write("done\n")
+            
+    def output(self):
+        '''
+        '''
+        return luigi.LocalTarget(self.verificationFile)
+        
 class AlignReads(luigi.Task):
     ''' Align trimmed reads to genome using bwa mem
     '''
+    # Parameters
+    samplesCfg = luigi.Parameter(description="Config file containing information on readSet to run")
+    readSet = luigi.Parameter(description="The readSet to analyze from the config file above")
+    
+    def __init__(self,*args,**kwargs):
+        '''
+        '''
+        super(self.__class__.__name__,self).__init__(*args,**kwargs)
+        currentDir = os.path.dirname(os.path.realpath(__file__))
+        verificationDir = os.path.join(currentDir,"verification")
+        self.verificationFile = os.path.join(verificationDir,
+                                             self.__class__.__name__+'.verification.txt')
+        
+    def requires(self):
+        '''
+        '''
+        return self.clone(TrimReads)
+    
+    def run(self):
+        '''
+        '''
+        readFileIn1 = cfg.readSet + ".prep.R1.fastq"
+        readFileIn2 = cfg.readSet + ".prep.R2.fastq"
+        bamFileOut = cfg.readSet + ".align.bam"
+        core.align.run(cfg,readFileIn1,readFileIn2,bamFileOut)
+        with open(self.verificationFile,'w') as OUT:
+            OUT.write("done\n")
+        
+    def output(self):
+        '''
+        '''
+        return luigi.LocalTarget(self.verificationFile)
 
 class AssignUMI(luigi.Task):
     ''' Call putative unique input molecules using BOTH UMI seq AND genome alignment position on random fragmentation side
     '''
+    # Parameters
+    samplesCfg = luigi.Parameter(description="Config file containing information on readSet to run")
+    readSet = luigi.Parameter(description="The readSet to analyze from the config file above")    
 
+    def __init__(self,*args,**kwargs):
+        '''
+        '''
+        super(self.__class__.__name__,self).__init__(*args,**kwargs)
+        currentDir = os.path.dirname(os.path.realpath(__file__))
+        verificationDir = os.path.join(currentDir,"verification")
+        self.verificationFile = os.path.join(verificationDir,
+                                             self.__class__.__name__+'.verification.txt')
+
+    def requires(self):
+        '''
+        '''
+        return self.clone(AlignReads)
+    
+    def run(self):
+        '''
+        '''
+        bamFileIn = cfg.readSet + ".align.bam"
+        core.umi_filter.run(cfg, bamFileIn)
+        core.umi_mark.run(cfg)
+        metrics.umi_frags.run(cfg)
+        metrics.umi_depths.run(cfg)
+        core.umi_merge.run(cfg, bamFileIn)
+        with open(self.verificationFile,'w') as OUT:
+            OUT.write("done\n")
+
+    def output(self):
+        '''
+        '''
+        return luigi.LocalTarget(self.verificationFile)        
+    
 class SoftClipBam(luigi.Task):
     ''' Soft clip primer regions from read alignments
     '''
+    # Parameters
+    samplesCfg = luigi.Parameter(description="Config file containing information on readSet to run")
+    readSet = luigi.Parameter(description="The readSet to analyze from the config file above")    
 
+    def __init__(self,*args,**kwargs):
+        '''
+        '''
+        super(self.__class__.__name__,self).__init__(*args,**kwargs)
+        currentDir = os.path.dirname(os.path.realpath(__file__))
+        verificationDir = os.path.join(currentDir,"verification")
+        self.verificationFile = os.path.join(verificationDir,
+                                             self.__class__.__name__+'.verification.txt')
+
+    def requires(self):
+        '''
+        '''
+        return self.clone(AssignUMI)
+
+    def run(self):
+        '''
+        '''
+        bamFileIn  = readSet + ".umi_merge.bam"
+        bamFileOut = readSet + ".primer_clip.bam"
+        core.primer_clip.run(cfg,bamFileIn,bamFileOut,False)
+        with open(self.verificationFile,'w') as OUT:
+            OUT.write("done\n")
+
+    def output(self):
+        '''
+        '''
+        return luigi.LocalTarget(self.verificationFile)
+    
 class SortBam(luigi.Task):
     ''' Sort the final BAM file, to prepare for downstream variant calling
     '''
+    # Parameters
+    samplesCfg = luigi.Parameter(description="Config file containing information on readSet to run")
+    readSet = luigi.Parameter(description="The readSet to analyze from the config file above")    
+
+    def __init__(self,*args,**kwargs):
+        '''
+        '''
+        super(self.__class__.__name__,self).__init__(*args,**kwargs)
+        currentDir = os.path.dirname(os.path.realpath(__file__))
+        verificationDir = os.path.join(currentDir,"verification")
+        self.verificationFile = os.path.join(verificationDir,
+                                             self.__class__.__name__+'.verification.txt')
+
+    def requires(self):
+        '''
+        '''
+        return self.clone(SoftClipBam)
+        
+    def run(self):
+        '''
+        '''
+        bamFileIn  = readSet + ".primer_clip.bam"
+        bamFileOut = readSet + ".bam"
+        core.samtools.sort(cfg,bamFileIn,bamFileOut)
+        with open(self.verificationFile,'w') as OUT:
+            OUT.write("done\n")
+
+    def output(self):
+        '''
+        '''
+        return luigi.LocalTarget(self.verificationFile)
 
 class RunSmCounter(luigi.Task):
     ''' Run smCounter variant calling
     '''
-    
-class AnnotateVCF(luigi.Task):
-    ''' Annotate a VCF file
-    '''
+    # Parameters
+    samplesCfg = luigi.Parameter(description="Config file containing information on readSet to run")
+    readSet = luigi.Parameter(description="The readSet to analyze from the config file above")    
+
     def __init__(self,*args,**kwargs):
         '''
         '''
-        super(AnnotateVCF,self).__init__(*args,**kwargs)
-        ## Add readSet info to global config
+        super(self.__class__.__name__,self).__init__(*args,**kwargs)
+        currentDir = os.path.dirname(os.path.realpath(__file__))
+        verificationDir = os.path.join(currentDir,"verification")
+        self.verificationFile = os.path.join(verificationDir,
+                                             self.__class__.__name__+'.verification.txt')
+
+    def requires(self):
+        '''
+        '''
+        return self.clone(SortBAM)
+    
+    def run(self):
+        '''
+        '''
+        numVariants = varcall.sm_counter_wrapper.run(cfg, paramFile)        
+        with open(self.verificationFile,'w') as OUT:
+            OUT.write("done\n")
+
+    def output(self):
+        '''
+        '''
+        return luigi.LocalTarget(self.verificationFile)
+
+class AnnotateVCF(luigi.Task):
+    ''' Annotate a VCF file
+    '''
+    # Parameters
+    samplesCfg = luigi.Parameter(description="Config file containing information on readSet to run")
+    readSet = luigi.Parameter(description="The readSet to analyze from the config file above")    
+    
+    def __init__(self,*args,**kwargs):
+        '''
+        '''
+        super(self.__class__.__name__,self).__init__(*args,**kwargs)
+        # initialize logger
+        core.run_log.init(readSet)        
+        # Add readSet info to global config
         global cfg
         parser = ConfigParser.ConfigParser()
-        parser.read(self.samples_cfg)        
-        ## Handle only 1 readSet at a time for now
+        parser.read(self.samplesCfg)        
+        # Handle only 1 readSet at a time for now
         found=False
         for section in parser.sections():
             if section == self.readSet:
@@ -117,6 +320,13 @@ class AnnotateVCF(luigi.Task):
                 found=True
 
         assert found==True,"Pipeline Failire !. Could not find readSet name in your config file !"
+        
+        currentDir = os.path.dirname(os.path.realpath(__file__))
+        verificationDir = os.path.join(currentDir,"verification")
+        if not os.path.exists(verificationDir):
+            os.makedirs(verificationDir)
+        self.verificationFile = os.path.join(verificationDir,
+                                             self.__class__.__name__+'.verification.txt')
 
     def requires(self):
         '''
@@ -135,19 +345,13 @@ class AnnotateVCF(luigi.Task):
         vcfFileIn = cfg.readSet + ".smCounter.cplx.vcf"
         vcfFileOut = cfg.readSet + ".smCounter.anno.vcf"
         varcall.vcf_annotate.run(cfg,vcfFileIn,vcfFileOut)
+        # close log file
+        core.run_log.close()        
         # write the verification file
-        with open(self.verification_file,'w') as OUT:
+        with open(self.verificationFile,'w') as OUT:
             OUT.write("done\n")
 
     def output(self):
         '''
         '''
         return luigi.LocalTarget(self.verification_file)
-        
-def main():
-    '''
-    '''   
-
-    
-if __name__ == '__main__':
-    main()
