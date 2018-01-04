@@ -13,18 +13,18 @@ def run(cfg, paramFile):
    parser.optionxform = str
    parser.read(paramFile)
    cfgSmCounter = {}
-   for (paramName, paramVal) in parser.items("smCounter"): 
+   for (paramName, paramVal) in parser.items("smcounter"): 
       cfgSmCounter[paramName] = paramVal
       
    # set up config dictionary to pass to smCounter
    cfgSmCounter["outPrefix"] = readSet
    cfgSmCounter["bamFile"  ] = readSet + ".bam"
    cfgSmCounter["bedTarget"] = cfg.roiBedFile
-   cfgSmCounter["mtDepth"  ] = cfg.umiDepthMean # this comes from metrics.umi_depths module
-   cfgSmCounter["rpb"      ] = cfg.readsPerUmi  # this comes from metrics.umi_frags module
+   #cfgSmCounter["mtDepth"  ] = cfg.umiDepthMean # this comes from metrics.umi_depths module
+   #cfgSmCounter["rpb"      ] = cfg.readsPerUmi  # this comes from metrics.umi_frags module
    cfgSmCounter["nCPU"     ] = cfg.numCores
    cfgSmCounter["refGenome"] = cfg.genomeFile
-   
+   print cfgSmCounter
    # run smCounter variant caller
    smCounterThreshold = sm_counter.main(cfgSmCounter)
    

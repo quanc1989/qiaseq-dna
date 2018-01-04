@@ -1,8 +1,28 @@
 import math
+import ConfigParser
 
 # constants
 FRAG_BINS = 46
 
+
+#---------------------------------------------------------------------   
+# Update the config file
+#---------------------------------------------------------------------   
+def updateConfigFile(configFile,info):
+   ''' Update a configfile  with a new parameter
+
+   :param str configFile: The config file to update  
+   :param list info: list of tuple of (section,param,value) to set
+   '''
+   # read the params
+   Config = ConfigParser.RawConfigParser()
+   Config.optionxform=str
+   Config.read(configFile)
+   for section,param,val in info:
+      Config.set(section,param,val)
+   with open(configFile,'wb') as OUT:
+      Config.write(OUT)
+   
 #---------------------------------------------------------------------   
 # metrics function
 #---------------------------------------------------------------------   
@@ -43,7 +63,7 @@ def getMetrics(vals):
 #---------------------------------------------------------------------   
 # main function
 #---------------------------------------------------------------------   
-def run(cfg):
+def run(cfg,configFile):
    print("umi_frags starting...")
    # params
    readSet = cfg.readSet
@@ -157,7 +177,9 @@ def run(cfg):
    
    # also save mean reads-per-molecule, for possible use in variant calling
    cfg.readsPerUmi = metricsReadNums[2]
-   
+   # update smcounter section in configfile
+   updateConfigFile(configFile,[('smcounter','rpb',cfg.readsPerUmi)])   
+  
 #----------------------------------------------------------------------------------------------
 # run from the command line
 #----------------------------------------------------------------------------------------------

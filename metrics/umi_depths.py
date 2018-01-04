@@ -1,6 +1,7 @@
 import os
 import os.path
 import subprocess
+from umi_frags import updateConfigFile
 
 #------------------------------------------------------------------------
 # bed merge
@@ -395,7 +396,7 @@ def makeUmiDepthBedgraph(cfg,readSupportMin,trackName):
 #---------------------------------------------------------------------   
 # main function
 #---------------------------------------------------------------------   
-def run(cfg):
+def run(cfg,configFile):
    print("umi_depths starting...")
    readSet  = cfg.readSet
    numCores = cfg.numCores
@@ -439,6 +440,9 @@ def run(cfg):
    
    # write bases of ROI that have MT depth below 20% of mean depth - can be concatenated
    umiDepthLow = 0.20 * cfg.umiDepthMean
+   # update smcounter section in config file
+   updateConfigFile(configFile,[('smcounter','mtDepth',cfg.umiDepthMean)])
+   
    fileout = open(readSet + ".umi_depths.LT20PctOfMean.txt", "w")
    fileout.write("\t".join(("read set", "chrom", "loc", "UMI depth")))
    fileout.write("\n")
