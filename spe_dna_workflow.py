@@ -1,6 +1,8 @@
 import luigi
 import sys
 import os
+import ConfigParser
+from multiprocessing.dummy import cpu_count as cpu_count
 # our modules
 import core.run_log
 import core.run_config
@@ -21,6 +23,10 @@ import varcall.vcf_annotate
 ## To Do:
 ## 1. Add param for output directory
 
+
+#--------------------------------------------------------------------------------------
+# Injest Config parameters
+#--------------------------------------------------------------------------------------
 class config(luigi.Config):
     ''' Map config file variables into class attributes
     '''
@@ -35,6 +41,7 @@ class config(luigi.Config):
     deleteLocalFiles = luigi.BoolParameter()
     samtoolsMem = luigi.Parameter()
     outputDetail = luigi.BoolParameter()
+    trimScript = luigi.Parameter()
     genomeFile = luigi.Parameter()
     # umi module
     endogenousLenMin = luigi.Parameter()
@@ -71,8 +78,11 @@ class smcounter(luigi.Config):
 #--------------------------------------------------------------------------------------
 cfg = config()
 for param,val in smcounter().__dict__['param_kwargs'].items():
-    setattr(cfg,param,val)
+    setattr(cfg,param,val)    
 
+#--------------------------------------------------------------------------------------
+# Luigi Task Definitions
+#--------------------------------------------------------------------------------------
 class MyExtTask(luigi.ExternalTask):
     ''' Checks whether the file specified exists on disk
     '''
@@ -91,8 +101,8 @@ class TrimReads(luigi.Task):
     def __init__(self,*args,**kwargs):
         '''
         '''
-        super(self.__class__.__name__,self).__init__(*args,**kwargs)
-        currentDir = os.path.dirname(os.path.realpath(__file__))
+        super(TrimReads,self).__init__(*args,**kwargs)
+        currentDir = os.getcwd()
         verificationDir = os.path.join(currentDir,"verification")
         self.verificationFile = os.path.join(verificationDir,
                                              self.__class__.__name__+'.verification.txt')
@@ -124,8 +134,8 @@ class AlignReads(luigi.Task):
     def __init__(self,*args,**kwargs):
         '''
         '''
-        super(self.__class__.__name__,self).__init__(*args,**kwargs)
-        currentDir = os.path.dirname(os.path.realpath(__file__))
+        super(AlignReads,self).__init__(*args,**kwargs)
+        currentDir = os.getcwd()
         verificationDir = os.path.join(currentDir,"verification")
         self.verificationFile = os.path.join(verificationDir,
                                              self.__class__.__name__+'.verification.txt')
@@ -155,13 +165,13 @@ class AssignUMI(luigi.Task):
     '''
     # Parameters
     samplesCfg = luigi.Parameter(description="Config file containing information on readSet to run")
-    readSet = luigi.Parameter(description="The readSet to analyze from the config file above")    
-
+    readSet = luigi.Parameter(description="The readSet to analyze from the config file above")
+    
     def __init__(self,*args,**kwargs):
         '''
         '''
-        super(self.__class__.__name__,self).__init__(*args,**kwargs)
-        currentDir = os.path.dirname(os.path.realpath(__file__))
+        super(AssignUMI,self).__init__(*args,**kwargs)
+        currentDir = os.getcwd()
         verificationDir = os.path.join(currentDir,"verification")
         self.verificationFile = os.path.join(verificationDir,
                                              self.__class__.__name__+'.verification.txt')
@@ -174,11 +184,12 @@ class AssignUMI(luigi.Task):
     def run(self):
         '''
         '''
+        global cfg
         bamFileIn = cfg.readSet + ".align.bam"
         core.umi_filter.run(cfg, bamFileIn)
         core.umi_mark.run(cfg)
-        metrics.umi_frags.run(cfg)
-        metrics.umi_depths.run(cfg)
+        metrics.umi_frags.run(cfg,os.environ['LUIGI_CONFIG_PATH'])
+        metrics.umi_depths.run(cfg,os.environ['LUIGI_CONFIG_PATH'])
         core.umi_merge.run(cfg, bamFileIn)
         with open(self.verificationFile,'w') as OUT:
             OUT.write("done\n")
@@ -193,13 +204,13 @@ class SoftClipBam(luigi.Task):
     '''
     # Parameters
     samplesCfg = luigi.Parameter(description="Config file containing information on readSet to run")
-    readSet = luigi.Parameter(description="The readSet to analyze from the config file above")    
-
+    readSet = luigi.Parameter(description="The readSet to analyze from the config file above")
+    
     def __init__(self,*args,**kwargs):
         '''
         '''
-        super(self.__class__.__name__,self).__init__(*args,**kwargs)
-        currentDir = os.path.dirname(os.path.realpath(__file__))
+        super(SoftClipBam,self).__init__(*args,**kwargs)
+        currentDir = os.getcwd()
         verificationDir = os.path.join(currentDir,"verification")
         self.verificationFile = os.path.join(verificationDir,
                                              self.__class__.__name__+'.verification.txt')
@@ -212,8 +223,8 @@ class SoftClipBam(luigi.Task):
     def run(self):
         '''
         '''
-        bamFileIn  = readSet + ".umi_merge.bam"
-        bamFileOut = readSet + ".primer_clip.bam"
+        bamFileIn  = self.readSet + ".umi_merge.bam"
+        bamFileOut = self.readSet + ".primer_clip.bam"
         core.primer_clip.run(cfg,bamFileIn,bamFileOut,False)
         with open(self.verificationFile,'w') as OUT:
             OUT.write("done\n")
@@ -228,13 +239,13 @@ class SortBam(luigi.Task):
     '''
     # Parameters
     samplesCfg = luigi.Parameter(description="Config file containing information on readSet to run")
-    readSet = luigi.Parameter(description="The readSet to analyze from the config file above")    
-
+    readSet = luigi.Parameter(description="The readSet to analyze from the config file above")
+    
     def __init__(self,*args,**kwargs):
         '''
         '''
-        super(self.__class__.__name__,self).__init__(*args,**kwargs)
-        currentDir = os.path.dirname(os.path.realpath(__file__))
+        super(SortBam,self).__init__(*args,**kwargs)
+        currentDir = os.getcwd()
         verificationDir = os.path.join(currentDir,"verification")
         self.verificationFile = os.path.join(verificationDir,
                                              self.__class__.__name__+'.verification.txt')
@@ -247,8 +258,8 @@ class SortBam(luigi.Task):
     def run(self):
         '''
         '''
-        bamFileIn  = readSet + ".primer_clip.bam"
-        bamFileOut = readSet + ".bam"
+        bamFileIn  = self.readSet + ".primer_clip.bam"
+        bamFileOut = self.readSet + ".bam"
         core.samtools.sort(cfg,bamFileIn,bamFileOut)
         with open(self.verificationFile,'w') as OUT:
             OUT.write("done\n")
@@ -263,13 +274,13 @@ class RunSmCounter(luigi.Task):
     '''
     # Parameters
     samplesCfg = luigi.Parameter(description="Config file containing information on readSet to run")
-    readSet = luigi.Parameter(description="The readSet to analyze from the config file above")    
-
+    readSet = luigi.Parameter(description="The readSet to analyze from the config file above")
+    
     def __init__(self,*args,**kwargs):
         '''
         '''
-        super(self.__class__.__name__,self).__init__(*args,**kwargs)
-        currentDir = os.path.dirname(os.path.realpath(__file__))
+        super(RunSmCounter,self).__init__(*args,**kwargs)
+        currentDir = os.getcwd()
         verificationDir = os.path.join(currentDir,"verification")
         self.verificationFile = os.path.join(verificationDir,
                                              self.__class__.__name__+'.verification.txt')
@@ -277,12 +288,12 @@ class RunSmCounter(luigi.Task):
     def requires(self):
         '''
         '''
-        return self.clone(SortBAM)
+        return self.clone(SortBam)
     
     def run(self):
         '''
         '''
-        numVariants = varcall.sm_counter_wrapper.run(cfg, paramFile)        
+        numVariants = varcall.sm_counter_wrapper.run(cfg,os.environ['LUIGI_CONFIG_PATH'])        
         with open(self.verificationFile,'w') as OUT:
             OUT.write("done\n")
 
@@ -296,16 +307,17 @@ class AnnotateVCF(luigi.Task):
     '''
     # Parameters
     samplesCfg = luigi.Parameter(description="Config file containing information on readSet to run")
-    readSet = luigi.Parameter(description="The readSet to analyze from the config file above")    
+    readSet = luigi.Parameter(description="The readSet to analyze from the config file above")
     
     def __init__(self,*args,**kwargs):
         '''
         '''
-        super(self.__class__.__name__,self).__init__(*args,**kwargs)
-        # initialize logger
-        core.run_log.init(readSet)        
+        super(AnnotateVCF,self).__init__(*args,**kwargs)
         # Add readSet info to global config
         global cfg
+        # Adjust num cores
+        if int(cfg.numCores) == 0:
+            cfg.numCores = str(cpu_count())
         parser = ConfigParser.ConfigParser()
         parser.read(self.samplesCfg)        
         # Handle only 1 readSet at a time for now
@@ -320,8 +332,9 @@ class AnnotateVCF(luigi.Task):
                 found=True
 
         assert found==True,"Pipeline Failire !. Could not find readSet name in your config file !"
-        
-        currentDir = os.path.dirname(os.path.realpath(__file__))
+        # initialize logger
+        core.run_log.init(cfg.readSet)                
+        currentDir = os.getcwd()
         verificationDir = os.path.join(currentDir,"verification")
         if not os.path.exists(verificationDir):
             os.makedirs(verificationDir)
@@ -354,4 +367,4 @@ class AnnotateVCF(luigi.Task):
     def output(self):
         '''
         '''
-        return luigi.LocalTarget(self.verification_file)
+        return luigi.LocalTarget(self.verificationFile)
