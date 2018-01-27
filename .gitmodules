@@ -1,0 +1,3 @@
+[submodule "qiaseq-smcounter"]
+	path = qiaseq-smcounter
+	url = https://github.com/qiaseq/qiaseq-smcounter.git
