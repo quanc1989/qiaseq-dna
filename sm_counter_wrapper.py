@@ -1,4 +1,5 @@
 import ConfigParser
+import os
 
 # our modules
 sm_counter_v1 = __import__("qiaseq-smcounter-v1.sm_counter")
@@ -51,16 +52,17 @@ def run(cfg, paramFile, vc):
    cfgSmCounter["refGenome"] = cfg.genomeFile
 
    if vc == 'v1':
-      cfgSmCounter["mtDepth"  ] = cfg.umiDepthMean # this comes from metrics.umi_depths module   
+      cfgSmCounter["mtDepth"] = cfg.umiDepthMean # this comes from metrics.umi_depths module   
       # run smCounter variant caller
-      smCounterThreshold = sm_counter_v1.main(cfgSmCounter)      
+      smCounterThreshold = sm_counter_v1.sm_counter.main(cfgSmCounter)      
    else:
-      sm_counter_v2.main(cfgSmCounter)
+      cfgSmCounter["runPath"] = os.getcwd()
+      sm_counter_v2.sm_counter_v2.main(cfgSmCounter)
       smCounterThreshold = 6
 
    # create low PI file for v1
    if vc == 'v1':
-      writeLowPIFile(readSet,smCounterThreshold)
+      makeLowPIFile(readSet,smCounterThreshold)
    
    # write smCounter threshold to disk file, for main summary table
    fileout = open(readSet + ".smCounter.summary.txt", "w")

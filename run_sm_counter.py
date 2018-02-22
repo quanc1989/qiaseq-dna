@@ -26,7 +26,7 @@ def run(readSet, paramFile, vc):
 
    # read run configuration file to memory
    cfg = core.run_config.run(readSet,paramFile)
-
+   
    # trim 3' ends of both reads, and extract UMI sequence
    core.prep.run(cfg)
    
@@ -53,9 +53,9 @@ def run(readSet, paramFile, vc):
    bamFileIn  = readSet + ".primer_clip.bam"
    bamFileOut = readSet + ".bam"
    core.samtools.sort(cfg,bamFileIn,bamFileOut)
-
+   
    # run smCounter variant calling
-   numVariants = varcall.sm_counter_wrapper.run(cfg, paramFile, vc)
+   numVariants = sm_counter_wrapper.run(cfg, paramFile, vc)
    
    # create complex variants, and annotate using snpEff
    if numVariants > 0:
@@ -69,7 +69,7 @@ def run(readSet, paramFile, vc):
       # annotate variants in the VCF file
       vcfFileIn  = readSet + ".smCounter.cplx.vcf"
       vcfFileOut = readSet + ".smCounter.anno.vcf"
-      annotate.vcf_annotate.run(cfg, vcfFileIn, vcfFileOut)
+      annotate.vcf_annotate.run(cfg, vcfFileIn, vcfFileOut,vc)
          
    # close log file
    core.run_log.close()
@@ -80,5 +80,5 @@ def run(readSet, paramFile, vc):
 if __name__ == "__main__":
    readSet   = sys.argv[1]
    paramFile = sys.argv[2]
-   vc = sys.argv[3]   
+   vc = sys.arv[3]
    run(readSet, paramFile, vc)
