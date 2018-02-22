@@ -12,14 +12,14 @@ import core.primer_clip
 import core.samtools
 import metrics.umi_frags
 import metrics.umi_depths
-import varcall.sm_counter_wrapper
-import varcall.vcf_complex
-import varcall.vcf_annotate
+import sm_counter_wrapper
+import annotate.vcf_complex
+import annotate.vcf_annotate
 
 #--------------------------------------------------------------------------------------
 # call input molecules, build consenus reads, align to genome, trim primer region
 #--------------------------------------------------------------------------------------
-def run(readSet, paramFile):
+def run(readSet, paramFile, vc):
 
    # initialize logger
    core.run_log.init(readSet)
@@ -55,7 +55,7 @@ def run(readSet, paramFile):
    core.samtools.sort(cfg,bamFileIn,bamFileOut)
 
    # run smCounter variant calling
-   numVariants = varcall.sm_counter_wrapper.run(cfg, paramFile)
+   numVariants = varcall.sm_counter_wrapper.run(cfg, paramFile, vc)
    
    # create complex variants, and annotate using snpEff
    if numVariants > 0:
@@ -64,12 +64,12 @@ def run(readSet, paramFile):
       bamFileIn  = readSet + ".bam"
       vcfFileIn  = readSet + ".smCounter.cut.vcf"
       vcfFileOut = readSet + ".smCounter.cplx.vcf"
-      varcall.vcf_complex.run(cfg, bamFileIn, vcfFileIn, vcfFileOut)
+      annotate.vcf_complex.run(cfg, bamFileIn, vcfFileIn, vcfFileOut)
          
       # annotate variants in the VCF file
       vcfFileIn  = readSet + ".smCounter.cplx.vcf"
       vcfFileOut = readSet + ".smCounter.anno.vcf"
-      varcall.vcf_annotate.run(cfg, vcfFileIn, vcfFileOut)
+      annotate.vcf_annotate.run(cfg, vcfFileIn, vcfFileOut)
          
    # close log file
    core.run_log.close()
@@ -79,5 +79,6 @@ def run(readSet, paramFile):
 #-------------------------------------------------------------------------------------
 if __name__ == "__main__":
    readSet   = sys.argv[1]
-   paramFile = sys.argv[2] if len(sys.argv) == 3 else "run-params.txt"
-   run(readSet, paramFile)
+   paramFile = sys.argv[2]
+   vc = sys.argv[3]   
+   run(readSet, paramFile, vc)
