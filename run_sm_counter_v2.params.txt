@@ -58,3 +58,13 @@ maxAltAllele = 2
 primerDist = 2 
 repBed = /srv/qgen/data/annotation/simpleRepeat.full.bed
 srBed = /srv/qgen/data/annotation/SR_LC_SL.full.bed
+
+# readSet
+[NEB_S2]
+readFile1 = /srv/qgen/example/NEB_S2_L001_R1_001.fastq.gz
+readFile2 = /srv/qgen/example/NEB_S2_L001_R2_001.fastq.gz
+primerFile = /srv/qgen/example/DHS-101Z.primers.txt
+roiBedFile = /srv/qgen/example/DHS-101Z.roi.bed
+platform = Illumina
+runCNV = False
+sampleType =  Single
