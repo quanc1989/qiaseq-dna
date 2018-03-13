@@ -3,8 +3,8 @@ import subprocess
 
 
 def runCopyNumberEstimates(cfg):
-    ''' Run CNV analysis using quandico
-    '''
+   ''' Run CNV analysis using quandico
+   '''
    referenceUmiFiles = cfg.referenceUmiFiles.split(",")
    assert len(referenceUmiFiles) >= 1, "No reference UMI Files supplied !"
     
@@ -20,7 +20,7 @@ def runCopyNumberEstimates(cfg):
              (readSet, primer, strand, chrom, loc5, loc3, umiCount) = vals[0:7]
              (strand, loc5, umiCount) = map(int,(strand, loc5, umiCount))
              key = (chrom,strand,loc5,primer)
-             umiCounts.append(key,umiCount))
+             umiCounts.append((key,umiCount))
              umiCountsTotal += umiCount
 
       # normalize to 1,000 mean MT depth and save in multi-readset hash
