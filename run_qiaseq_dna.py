@@ -32,6 +32,10 @@ def run(readSet, paramFile, vc):
    cfg = core.run_config.run(readSet,paramFile)
    
    if cfg.platform.lower() == "illumina":
+
+      if cfg.duplex.lower() == True: ## Duplex sequencing run
+         pass
+
       # trim 3' ends of both reads, and extract UMI sequence
       core.prep.run(cfg)
    
@@ -128,7 +132,7 @@ if __name__ == "__main__":
    paramFile = sys.argv[1]
    vc = sys.argv[2]
    analysis = sys.argv[3]
-   readSet   = sys.argv[4] # 2 readSets in case of tumor-normal
+   readSet   = " ".join(sys.argv[4:]) # 2 readSets in case of tumor-normal
 
    if analysis == "tumor-normal":      
       tumor_normal(readSet,paramFile,vc)
