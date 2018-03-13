@@ -1,6 +1,7 @@
 import sys
 
 # our modules
+sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 import core.run_log
 import core.run_config
 import core.prep

@@ -11,12 +11,12 @@ import core.umi_merge
 import core.primer_clip
 import core.samtools
 import core.tumor_normal
+import core.sm_counter_wrapper
 import metrics.sum_specificity
 import metrics.sum_uniformity_primer
 import metrics.umi_frags
 import metrics.umi_depths
 import misc.tvc
-import sm_counter_wrapper
 import annotate.vcf_complex
 import annotate.vcf_annotate
 
