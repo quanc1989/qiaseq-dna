@@ -39,7 +39,7 @@ def run(cfg):
    depthVecs = ([], [])  # MTs, reads
       
    # loop over primer read depths from previous step, compute raw and MT-corrected uniformity
-   for line in open(readSet + ".sumPrimerMts.txt", "r"):
+   for line in open(readSet + ".sum.primer.umis.txt", "r"):
    
       # skip column header line
       if line.startswith("read set"):

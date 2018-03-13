@@ -11,7 +11,7 @@ def run(cfg):
 
     # concatenate summary files
     with open(readSet + ".sumAll.summary.txt", "w") as OUT:
-        for fileType in ("prep", umiFilterFile, "sum.primer.umis", "umi_frags.len-distrib.txt", "sum.uniformity.primer", "umi_depths.summary.txt", "smCounter", "vcf_complex"):
+        for fileType in ("prep", umiFilterFile, "sum.primer.umis", "umi_frags.len-distrib.txt", "sum.uniformity.primer", "umi_depths", "smCounter", "vcf_complex"):
             '''
             prep --> trimming metrics ; core/prep.py
             umiFilterFile --> primer finding metrics : core/umi_filter.py

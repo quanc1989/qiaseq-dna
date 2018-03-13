@@ -109,7 +109,8 @@ def getTargetBed(cfg):
          fileout.write("\n")
       fileout.close()
 
-   bpTarget = sum((x[3] - x[1] for x in bedTarget))
+   print bedTarget   
+   bpTarget = sum((x[2] - x[1] for x in bedTarget))
    print("target region size:",bpTarget)
    # done
    return (bedTarget,bpTarget)

@@ -14,6 +14,8 @@ import core.tumor_normal
 import core.sm_counter_wrapper
 import metrics.sum_specificity
 import metrics.sum_uniformity_primer
+import metrics.sum_primer_umis
+import metrics.sum_all
 import metrics.umi_frags
 import metrics.umi_depths
 import misc.tvc
@@ -47,13 +49,13 @@ def run(readSet, paramFile, vc):
    else:
       misc.tvc.trimIon(cfg)
       misc.tvc.alignToGenomeIon(cfg)
-   
+
    # call putative unique input molecules using BOTH UMI seq AND genome alignment position on random fragmentation side
    bamFileIn  = readSet + ".align.bam"
    core.umi_filter.run(cfg, bamFileIn)
-   core.umi_mark.run(cfg)
-   metrics.umi_frags.run(cfg)
-   metrics.umi_depths.run(cfg)
+   core.umi_mark.run(cfg)   
+   metrics.umi_frags.run(cfg)   
+   metrics.umi_depths.run(cfg)   
    core.umi_merge.run(cfg, bamFileIn)
    
    # soft clip primer regions from read alignments
@@ -62,6 +64,7 @@ def run(readSet, paramFile, vc):
    core.primer_clip.run(cfg,bamFileIn,bamFileOut,False)
 
    # additional metrics to generate
+   metrics.sum_primer_umis.run(cfg)
    metrics.sum_specificity.run(cfg) # priming specificity
    metrics.sum_uniformity_primer.run(cfg) # primer-level uniformity
 
@@ -71,7 +74,7 @@ def run(readSet, paramFile, vc):
    core.samtools.sort(cfg,bamFileIn,bamFileOut)
    
    # run smCounter variant calling
-   numVariants = sm_counter_wrapper.run(cfg, paramFile, vc)
+   numVariants = core.sm_counter_wrapper.run(cfg, paramFile, vc)
    
    # create complex variants, and annotate using snpEff
    if numVariants > 0:
@@ -94,7 +97,10 @@ def run(readSet, paramFile, vc):
       # only run once for a readSet (this function gets called twice for tumor-normal)
       if cfg.sampleType.lower() == "single" or cfg.sampleType.lower() == "tumor":
          core.tumor_normal.runCopyNumberEstimates(cfg)
-
+   
+   # aggregate all summary metrics
+   metrics.sum_all.run(cfg)
+   
    # close log file
    core.run_log.close()
 

@@ -67,7 +67,7 @@ def runCopyNumberEstimates(cfg):
    # convert sample readset MT counts to format needed by quandico (NOTE: not normalized - quandico will do that)
    umiFileSample = readSet + ".copy-number.sample.txt"
    fileout = open(umiFileSample,"w")
-   fileName = readSet + ".sumPrimerUmis.txt"
+   fileName = readSet + ".sum.primer.umis.txt"
    for line in open(fileName,"r"):
       if line.startswith("read set|"):
            continue

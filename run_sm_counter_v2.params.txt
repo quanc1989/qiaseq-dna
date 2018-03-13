@@ -68,3 +68,4 @@ roiBedFile = /srv/qgen/example/DHS-101Z.roi.bed
 platform = Illumina
 runCNV = False
 sampleType =  Single
+duplex = False
