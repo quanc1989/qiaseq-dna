@@ -119,7 +119,7 @@ def run(cfg):
       print("WARNING: R1 reads start with PCR adapter - custom sequencing primer was not used on primer side!")
       cmd = cutadaptDir + "cutadapt -e 0.18 -O 18" \
           + " -g ^AATGTACAGTATTGCGTTTTG -n 1" \
-          + " -o " + filePrefixOut + ".fixed.R1.fastq" \
+          + " -o " + filePrefixOut + ".fixed.R1.fastq " \
                    + readFile1  \
           + " > "  + filePrefixOut + ".cutadapt.5.R1.log 2>&1"
       subprocess.check_call(cmd, shell=True)
