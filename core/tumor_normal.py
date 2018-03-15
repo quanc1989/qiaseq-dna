@@ -1,6 +1,6 @@
 import os
 import subprocess
-
+import string
 
 def runCopyNumberEstimates(cfg):
    ''' Run CNV analysis using quandico
@@ -83,7 +83,8 @@ def runCopyNumberEstimates(cfg):
    fileout.close()
 
    # make work directory
-   os.mkdir("_quandico_work_")
+   if not os.path.exists("_quandico_work_"):
+      os.mkdir("_quandico_work_")
    
    # get code dir for quandico
    codeDirQuandico = cfg.quandicoDir
@@ -126,7 +127,7 @@ def removeNormalVariants(cfg):
                    normalVariants.add(tuple(vals[0:5]))
                     
    # filter tumor VCF and corresponding tumor flat file
-   for fileSuffix in (".smCounter.anno.txt","smCounter.anno.vcf"):
+   for fileSuffix in (".smCounter.anno.txt",".smCounter.anno.vcf"):
        with open(readSetTumor + fileSuffix + ".temp",'w') as OUT:
            with open(readSetTumor + fileSuffix,'r') as IN:
                for line in IN:
@@ -138,7 +139,7 @@ def removeNormalVariants(cfg):
                        if key not in normalVariants:
                            OUT.write(line)
     # replace tumor vcf and flat file with the updated temp files
-   for fileSuffix in (".smCounter.anno.txt","smCounter.anno.vcf"):
+   for fileSuffix in (".smCounter.anno.txt",".smCounter.anno.vcf"):
        os.system("mv {temp} {f}".format(temp = readSetTumor + fileSuffix + ".temp",
                                         f    = readSetTumor + fileSuffix))
 

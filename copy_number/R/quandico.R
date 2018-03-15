@@ -9,7 +9,7 @@ options(error = quote({
 
 # save current directory, change to code directory (need to remove hard-code here)
 dirsave <- getwd()
-setwd("/srv/qgen/code/quandico/R")
+setwd("/srv/qgen/code/qiaseq-dna/copy_number/R/")
 
 # import libraries and own sources
 #suppressPackageStartupMessages(
@@ -806,4 +806,5 @@ if (config.write.dataset) {
 #message("Done")
 
 dev.off()
+summary(warnings())
 q()

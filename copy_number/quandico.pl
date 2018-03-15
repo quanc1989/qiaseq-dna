@@ -55,7 +55,7 @@ my ( $opt, $usage ) = describe_options(
 	],
 	['rexe|x=s',  'R executable (default: /usr/bin/R)',      {default => '/usr/bin/R'}],
 	['rpath|y=s', 'path where the R script resides in',      {default => '/srv/qiagen/software/quandico/R/'}],
-	['rcall|z=s', 'R script to run (default: < quandico.R)', {default => ' < /srv/qgen/code/quandico/R/quandico.R'}],
+	['rcall|z=s', 'R script to run (default: < quandico.R)', {default => ' < /srv/qgen/code/qiaseq-dna/copy_number/R/quandico.R'}],
 	['mock|m',    'do not run R, only print the call'],
 	['
   standard options:'
@@ -183,7 +183,8 @@ ERROR: Input data file not readable.
 		)
 	);
 	my $redirect = $opt->{verbose} ? '' : '2>/dev/null';
-	my $Rcall = join( " ", $opt->{rexe}, '--vanilla', '--slave', @RArgs, $opt->{rcall}, $redirect );
+	#my $Rcall = join( " ", $opt->{rexe}, '--vanilla', '--slave', @RArgs, $opt->{rcall}, $redirect );
+        my $Rcall = join( " ", $opt->{rexe}, '--vanilla', '--slave', @RArgs, $opt->{rcall} );
 
 	# prepare the call to R
 	RUN_R: {
