@@ -57,9 +57,9 @@ def runCopyNumberEstimates(cfg):
       refGenomeBase = primer[0]
       if strand == 1:
          refGenomeBase = refGenomeBase.translate(dnaComplementTranslation)
-         outvec = (chrom, loc5+1, strand, refGenomeBase, "foobar", umiCount)
-         fileout.write("\t".join((str(x) for x in outvec)))
-         fileout.write("\n")
+      outvec = (chrom, loc5+1, strand, refGenomeBase, "foobar", umiCount)
+      fileout.write("\t".join((str(x) for x in outvec)))
+      fileout.write("\n")
            
    # done writing input reference file
    fileout.close()
