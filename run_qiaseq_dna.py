@@ -1,5 +1,5 @@
 import sys
-
+import ConfigParser
 # our modules
 import core.run_log
 import core.run_config
@@ -14,7 +14,6 @@ import core.tumor_normal
 import core.sm_counter_wrapper
 import metrics.sum_specificity
 import metrics.sum_uniformity_primer
-import metrics.sum_primer_umis
 import metrics.sum_all
 import metrics.umi_frags
 import metrics.umi_depths
@@ -32,7 +31,7 @@ def run(readSet, paramFile, vc):
 
    # read run configuration file to memory
    cfg = core.run_config.run(readSet,paramFile)
-   
+
    if cfg.platform.lower() == "illumina":
 
       if cfg.duplex.lower() == True: ## Duplex sequencing run
@@ -63,8 +62,7 @@ def run(readSet, paramFile, vc):
    bamFileOut = readSet + ".primer_clip.bam"
    core.primer_clip.run(cfg,bamFileIn,bamFileOut,False)
 
-   # additional metrics to generate
-   metrics.sum_primer_umis.run(cfg)
+   # additional metrics to generate   
    metrics.sum_specificity.run(cfg) # priming specificity
    metrics.sum_uniformity_primer.run(cfg) # primer-level uniformity
 
@@ -91,9 +89,10 @@ def run(readSet, paramFile, vc):
       annotate.vcf_annotate.run(cfg, vcfFileIn, vcfFileOut,vc)
 
    if cfg.sampleType.lower() == "tumor":  ## the assumption is that the normal sample has already been run
-      core.tumor_normal.removeNormalVariants.run(cfg)
+      core.tumor_normal.removeNormalVariants(cfg)
 
-   if cfg.runCNV == "true": # run copy number analysis
+   if cfg.runCNV.lower() == "true": # run copy number analysis
+      print "Running quandico"
       # only run once for a readSet (this function gets called twice for tumor-normal)
       if cfg.sampleType.lower() == "single" or cfg.sampleType.lower() == "tumor":
          core.tumor_normal.runCopyNumberEstimates(cfg)
@@ -109,7 +108,7 @@ def run_tumor_normal(readSet,paramFile,vc):
    ''' Wrapper around run() for tumor-normal analysis
    '''
    # 2 read set names which are space delimited
-   readSets = filter(None,a.split(" "))
+   readSets = filter(None,readSet.split(" "))
    assert len(readSets) == 2, "Tumor-Normal Analysis requires exactly 2 read sets !"
 
    # read parameter file
@@ -122,10 +121,10 @@ def run_tumor_normal(readSet,paramFile,vc):
    for section in parser.sections():
       if section not in ['general','smCounter']:
          for (paramName, paramVal) in parser.items(section):
-            if paramName == 'sampleType' and paramVal == 'Normal':
-               normal = sample
-            elif paramName == 'sampleType' and paramVal == 'Tumor':
-               tumor = sample
+            if paramName == 'sampleType' and paramVal.lower() == 'normal':
+               normal = section
+            elif paramName == 'sampleType' and paramVal.lower() == 'tumor':
+               tumor = section
 
    assert tumor!=None and normal!=None, "Could not sync read set names supplied with config file !"
    run(normal,paramFile,vc)
@@ -141,6 +140,6 @@ if __name__ == "__main__":
    readSet   = " ".join(sys.argv[4:]) # 2 readSets in case of tumor-normal
 
    if analysis == "tumor-normal":      
-      tumor_normal(readSet,paramFile,vc)
+      run_tumor_normal(readSet,paramFile,vc)
    else: # Single sample, might still need to run quandico
       run(readSet,paramFile,vc)
