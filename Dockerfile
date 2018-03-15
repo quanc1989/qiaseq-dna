@@ -97,6 +97,42 @@ RUN cd /opt/conda/share/snpeff-4.2-0/ && \
 ## The command below is not working anymore because of some certificate issue (debug later)
 #RUN /opt/conda/jre/bin/java -jar /opt/conda/share/snpeff-4.2-0/snpEff.jar download GRCh37.75
 
+
+################ Modules for CNV Analysis ################
+## Perl
+RUN cpan DateTime
+RUN cpan DBI
+RUN cpan DBD::SQLite
+RUN cpan Env::Path
+RUN cpan File::chdir
+RUN cpan Getopt::Long::Descriptive
+RUN cpan Sort:Naturally
+RUN cpan Config::IniFiles
+RUN cpan Data::Dump::Color
+RUN cpan Data::Table::Excel
+RUN cpan Hash::Merge
+RUN cpan File::Slurp
+## R
+RUN Rscript -e "install.packages('MASS')"
+RUN Rscript -e "install.packages('ggplot2')"
+RUN Rscript -e "install.packages('gridExtra')"
+RUN Rscript -e "install.packages('naturalsort')"
+RUN Rscript -e "install.packages('scales')"
+RUN Rscript -e "install.packages('ggplot2')"
+RUN Rscript -e "install.packages('extrafont')"
+## Annotation file
+RUN wget https://storage.googleapis.com/qiaseq-dna/data/annotation/refGene.txt \
+         -P /srv/qgen/data/annotation/
+
+################ TVC binaries ################
+RUN mkdir -p /srv/qgen/bin/TorrentSuite/
+RUN wget https://storage.googleapis.com/qiaseq-dna/lib/TorrentSuite/tmap \
+    	 https://storage.googleapis.com/qiaseq-dna/lib/TorrentSuite/tvc \
+	 -P /srv/qgen/bin/TorrentSuite/
+RUN chmod 775 /srv/qgen/bin/TorrentSuite/tmap /srv/qgen/bin/TorrentSuite/tvc
+
+
+
 ## Add example fastqs and files
 RUN wget https://storage.googleapis.com/qiaseq-dna/example/NEB_S2_L001_R1_001.fastq.gz \
     	 https://storage.googleapis.com/qiaseq-dna/example/NEB_S2_L001_R2_001.fastq.gz \
