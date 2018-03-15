@@ -14,6 +14,7 @@ import core.tumor_normal
 import core.sm_counter_wrapper
 import metrics.sum_specificity
 import metrics.sum_uniformity_primer
+import metrics.sum_primer_umis
 import metrics.sum_all
 import metrics.umi_frags
 import metrics.umi_depths
@@ -62,7 +63,8 @@ def run(readSet, paramFile, vc):
    bamFileOut = readSet + ".primer_clip.bam"
    core.primer_clip.run(cfg,bamFileIn,bamFileOut,False)
 
-   # additional metrics to generate   
+   # additional metrics to generate
+   metrics.sum_primer_umis.run(cfg) # primer-level umi and read metrics
    metrics.sum_specificity.run(cfg) # priming specificity
    metrics.sum_uniformity_primer.run(cfg) # primer-level uniformity
 
