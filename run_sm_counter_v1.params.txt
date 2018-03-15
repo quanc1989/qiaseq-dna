@@ -8,6 +8,12 @@ javaExe     = /opt/conda/jre/bin/java
 # ssw for fast Smith-Waterman
 sswPyFile = /srv/qgen/bin/ssw/src/ssw_wrap.py
 
+# Ion torrent tools
+torrentBinDir = /srv/qgen/bin/TorrentSuite
+
+# quandico
+quandicoDir = /srv/qgen/code/qiaseq-dna/quandico/
+
 # general params
 numCores = 0
 deleteLocalFiles = False
@@ -18,7 +24,8 @@ outputDetail = True
 trimScript = /srv/qgen/code/qiaseq-dna/core/prep_trim.py
 
 # geneome file
-genomeFile = /srv/qgen/data/genome/ucsc.hg19.fa  ; this has some ALT mask hacks, but has NC_012920 instead of UCSC chrM (NC_001807)
+genomeFile = /srv/qgen/data/genome/ucsc.hg19.fa
+torrentGenomeFile = /srv/qgen/data/genome_tmap/ucsc.hg19.fa
 
 # umi module
 endogenousLenMin = 15
@@ -53,21 +60,13 @@ bedtoolsPath = /opt/conda/bin/
 bedTandemRepeats      = /srv/qgen/data/annotation/simpleRepeat_TRF.bed
 bedRepeatMaskerSubset = /srv/qgen/data/annotation/SR_LC_SL_RepeatMasker.bed
 
-# parameters specific to a read set - one section per read set 
+# readSet
 [NEB_S2]
 readFile1 = /srv/qgen/example/NEB_S2_L001_R1_001.fastq.gz
 readFile2 = /srv/qgen/example/NEB_S2_L001_R2_001.fastq.gz
 primerFile = /srv/qgen/example/DHS-101Z.primers.txt
 roiBedFile = /srv/qgen/example/DHS-101Z.roi.bed
-
-[MS05-3-cfDNA_S2]
-readFile1 = /mnt/webserver/datadisk/resources/jdicarlo/MS05-3-cfDNA_S2_R1.fastq
-readFile2 = /mnt/webserver/datadisk/resources/jdicarlo/MS05-3-cfDNA_S2_R2.fastq
-primerFile = DHS-3501Z.primers3.txt
-roiBedFile = /mnt/webserver/datadisk/resources/spe-dna-roi/DHS-3501Z.roi.bed
-
-[SRR3493403]
-readFile1  = /mnt/webserver/datadisk/resources/jdicarlo/SRR3493403_1.fastq
-readFile2  = /mnt/webserver/datadisk/resources/jdicarlo/SRR3493403_2.fastq
-primerFile = /mnt/webserver/datadisk/resources/jdicarlo/NA12878-194-genes-63-indels.10867.primers3.txt
-roiBedFile = /mnt/webserver/datadisk/resources/jdicarlo/NA12878-194-genes-63-indels.roi.bed
+platform = Illumina
+runCNV = False
+sampleType =  Single
+duplex = False

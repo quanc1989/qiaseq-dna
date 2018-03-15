@@ -108,9 +108,12 @@ def getTargetBed(cfg):
          fileout.write("\t".join((str(x) for x in row)))
          fileout.write("\n")
       fileout.close()
-      
+
+   print bedTarget   
+   bpTarget = sum((x[2] - x[1] for x in bedTarget))
+   print("target region size:",bpTarget)
    # done
-   return bedTarget
+   return (bedTarget,bpTarget)
 
 #------------------------------------------------------------------------
 # get UMI depth bedgraph, in target region only
@@ -414,11 +417,11 @@ def run(cfg):
    print("umi_depths: done making depth bedgraphs")
    
    # get target region from disk, or make it if not specified
-   bedTarget = getTargetBed(cfg)
+   bedTarget,bpTarget = getTargetBed(cfg)
    
    # open summary file
    fileout = open(readSet + ".umi_depths.summary.txt", "w")
-   
+   fileout.write("{}\t# of target bases\n".format(bpTarget))
    # remove non-target regions from UMI depth bedgraph, compute uniformity metrics
    bedgraphDepths = getDepthsInRoi(bedTarget, readSet + ".umi_depths.bedgraph")
    getUniformityMetrics(bedgraphDepths, fileout, "UMI")

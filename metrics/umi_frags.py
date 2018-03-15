@@ -105,7 +105,7 @@ def run(cfg):
    
    # open output file for fragment length distribution, write column headers
    fileout = open(readSet + ".umi_frags.len-distrib.txt", "w")
-   outvec = ["read set", "frag len", "UMIs", "reads", "rpmMean", "rpm25", "rpm50", "rpm75"]
+   outvec = ["read set", "frag len", "UMIs", "reads", "rpumiMean", "rpumi25", "rpumi50", "rpumi75"]
    fileout.write("|".join(outvec))
    fileout.write("\n")
    
@@ -134,10 +134,10 @@ def run(cfg):
 
    # set up metric names and values for output
    metricNames = ("UMIs", "read fragments"
-   ,"read fragments per MT, mean"
-   ,"read fragments per MT, 25th percentile"
-   ,"read fragments per MT, 50th percentile"
-   ,"read fragments per MT, 75th percentile"
+   ,"read fragments per UMI, mean"
+   ,"read fragments per UMI, 25th percentile"
+   ,"read fragments per UMI, 50th percentile"
+   ,"read fragments per UMI, 75th percentile"
    ,"sample fragment length, 25th percentile (bp)"
    ,"sample fragment length, 50th percentile (bp)"
    ,"sample fragment length, 75th percentile (bp)"

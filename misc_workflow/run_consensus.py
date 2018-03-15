@@ -1,6 +1,7 @@
 import sys
 
 # our modules
+sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 import core.run_log
 import core.run_config
 import core.prep
@@ -9,24 +10,20 @@ import core.umi_filter
 import core.umi_mark
 import core.umi_merge
 import core.primer_clip
+import core.consensus
 import core.samtools
-import metrics.umi_frags
-import metrics.umi_depths
-import sm_counter_wrapper
-import annotate.vcf_complex
-import annotate.vcf_annotate
 
 #--------------------------------------------------------------------------------------
 # call input molecules, build consenus reads, align to genome, trim primer region
 #--------------------------------------------------------------------------------------
-def run(readSet, paramFile, vc):
+def run(readSet, paramFile):
 
    # initialize logger
    core.run_log.init(readSet)
 
    # read run configuration file to memory
    cfg = core.run_config.run(readSet,paramFile)
-   
+
    # trim 3' ends of both reads, and extract UMI sequence
    core.prep.run(cfg)
    
@@ -40,37 +37,39 @@ def run(readSet, paramFile, vc):
    bamFileIn  = readSet + ".align.bam"
    core.umi_filter.run(cfg, bamFileIn)
    core.umi_mark.run(cfg)
-   metrics.umi_frags.run(cfg)
-   metrics.umi_depths.run(cfg)
    core.umi_merge.run(cfg, bamFileIn)
-   
-   # soft clip primer regions from read alignments
+
+   # soft clip primer regions, but only on reads from internal resampling priming
    bamFileIn  = readSet + ".umi_merge.bam"
    bamFileOut = readSet + ".primer_clip.bam"
+   core.primer_clip.run(cfg,bamFileIn,bamFileOut,True)
+
+   # make consensus reads using Fulcrum Genomics fgbio tools, and merge primer info to fastq header comment
+   bamFileIn    = readSet + ".primer_clip.bam"
+   primerFileIn = readSet + ".umi_merge.primers.txt"
+   core.consensus.run(cfg,bamFileIn,primerFileIn)
+   
+   # align consensus reads to genome using BWA MEM
+   readFileIn1 = readSet + ".consensus.R1.fastq"
+   readFileIn2 = readSet + ".consensus.R2.fastq"
+   bamFileOut  = readSet + ".consensus.align.bam"
+   core.align.run(cfg, readFileIn1, readFileIn2, bamFileOut)
+   
+   # filter consensus read alignments that might cause trouble for SNP/indel calling and/or primer region clipping
+   bamFileIn  = readSet + ".consensus.align.bam"
+   bamFileOut = readSet + ".consensus.filter.bam"
+   core.consensus.filter(cfg,bamFileIn,bamFileOut)
+   
+   # soft clip primer regions from consensus reads
+   bamFileIn  = readSet + ".consensus.filter.bam"
+   bamFileOut = readSet + ".consensus.primer_clip.bam"
    core.primer_clip.run(cfg,bamFileIn,bamFileOut,False)
 
    # sort the final BAM file, to prepare for downstream variant calling
-   bamFileIn  = readSet + ".primer_clip.bam"
-   bamFileOut = readSet + ".bam"
+   bamFileIn  = readSet + ".consensus.primer_clip.bam"
+   bamFileOut = readSet + ".consensus.sorted.bam"
    core.samtools.sort(cfg,bamFileIn,bamFileOut)
-   
-   # run smCounter variant calling
-   numVariants = sm_counter_wrapper.run(cfg, paramFile, vc)
-   
-   # create complex variants, and annotate using snpEff
-   if numVariants > 0:
-   
-      # convert nearby primitive variants to complex variants
-      bamFileIn  = readSet + ".bam"
-      vcfFileIn  = readSet + ".smCounter.cut.vcf"
-      vcfFileOut = readSet + ".smCounter.cplx.vcf"
-      annotate.vcf_complex.run(cfg, bamFileIn, vcfFileIn, vcfFileOut)
-         
-      # annotate variants in the VCF file
-      vcfFileIn  = readSet + ".smCounter.cplx.vcf"
-      vcfFileOut = readSet + ".smCounter.anno.vcf"
-      annotate.vcf_annotate.run(cfg, vcfFileIn, vcfFileOut,vc)
-         
+
    # close log file
    core.run_log.close()
    
@@ -79,6 +78,5 @@ def run(readSet, paramFile, vc):
 #-------------------------------------------------------------------------------------
 if __name__ == "__main__":
    readSet   = sys.argv[1]
-   paramFile = sys.argv[2]
-   vc = sys.arv[3]
-   run(readSet, paramFile, vc)
+   paramFile = sys.argv[2] if len(sys.argv) == 3 else "run-params.txt"
+   run(readSet, paramFile)
