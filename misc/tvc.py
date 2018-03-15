@@ -37,6 +37,7 @@ def trimIon(cfg):
 
    # pull first 12 bp off, move to header
    fileout = open(readSet + ".temp0.R1.fastq","w")
+   fileoutTag = open(readSet + ".umi.tag.txt","w")
    numReadsWithAdapter3 = 0
    numReadsDroppedTooShort = 0
    lines = []
@@ -64,16 +65,21 @@ def trimIon(cfg):
 
          # add barcode to R1 id line
          line = lines[0]
-         idx = line.find(" ")
+         idx = line.find(" ")         
+
+         '''
          if idx == -1:
             lines[0] = line        + ":" + barcode
          else:
-            lines[0] = line[0:idx] + ":" + barcode + line[idx:]
-         
+            lines[0] = line[0:idx] + ":" + barcode + line[idx:]       
+         '''
          # write output fastq
          for i in range(4):
             fileout.write(lines[i] + "\n")
             
+         # write tags for adding to bam later
+         fileoutTag.write(lines[0]+"\t"+barcode+"\n") 
+         
          # clear for next read           
          del(lines[:])
    fileout.close()
@@ -114,6 +120,7 @@ def trimIon(cfg):
 
    # set up reverse comlement
    dnaComplementTranslation = string.maketrans("ATGC", "TACG")
+
    
    # make fake R2 (primer side) file
    fileout = open(readSet + ".trimmed.R2.fastq", "w")
@@ -140,44 +147,59 @@ def trimIon(cfg):
 def alignToGenomeIon(cfg):
    # get some parameters from config
    readSet = cfg.readSet
-   numCpus = cfg.numCpus
+   numCpus = cfg.numCores
    samtoolsDir = cfg.samtoolsDir
    samtoolsMem = cfg.samtoolsMem
    torrentBinDir = cfg.torrentBinDir
    torrentGenomeFile = cfg.torrentGenomeFile
-   
+   tmap = os.path.join(torrentBinDir,"tmap")
    # align full-length reads to reference genome using TMAP
-   cmd = "{}tmap mapall -n {} -r {}.trimmed.R1.fastq -f {} -v -Y -u --prefix-exclude 5 -o 2 stage1 map4 > ".format(torrentBinDir,numCpus,readSet,torrentGenomeFile) \
+   cmd = "{} mapall -n {} -r {}.trimmed.R1.fastq -f {} -v -Y -u --prefix-exclude 5 -o 2 stage1 map4 > ".format(tmap,numCpus,readSet,torrentGenomeFile) \
    + readSet + ".temp.bam 2> " \
    + readSet + ".align.tmap.log "
    subprocess.check_call(cmd, shell=True)
 
    # delete unneeded fastq file
    os.remove(readSet + ".trimmed.R1.fastq")
+
+   # add tag to bam
+   bamIn = readSet + ".temp.bam"
+   bamOut = readSet + ".temp1.bam"
+   add_bam_tags(bamIn,bamOut,readSet)
    
    # add a fake reverse compliment read alignment (i.e. simulate paired-end primer-side read) for use in downstream code
-   bamIn  = pysam.Samfile(readSet + ".temp.bam", "rb")
+   bamIn  = pysam.Samfile(readSet + ".temp1.bam", "rb")
    bamOut = pysam.AlignmentFile(readSet + ".align.bam", "wb", template=bamIn)
    for read1 in bamIn:
+      '''
       read1.is_paired = True
       read1.is_read1 = True
       read1.is_read2 = False
       read2 = copy.deepcopy(read1)
       read2.is_read2 = True
       read2.is_read1 = False
+      '''
+      read1.is_paired = True
+      read1.is_read1 = False
+      read1.is_read2 = True
+      read2 = copy.deepcopy(read1)
+      read2.is_read2 = False
+      read2.is_read1 = True
+      
       if not read1.is_unmapped:
          read2.is_reverse = not read1.is_reverse
          read1.mate_is_reverse = read2.is_reverse
          read2.mate_is_reverse = read1.is_reverse
          read1.mate_is_unmapped = False
          read2.mate_is_unmapped = False
-      bamOut.write(read1)
       bamOut.write(read2)
+      bamOut.write(read1)
    bamIn.close()
    bamOut.close()
 
-   # delete unneeded bam file
+   # delete unneeded bam files
    os.remove(readSet + ".temp.bam")
+   os.remove(readSet + ".temp1.bam")
    
    # sort by locus for IGV viewing, and for mtMerge with hashing by chromosome
    cmd = samtoolsDir + "samtools sort -m " + samtoolsMem + " -@" + numCpus \
@@ -190,3 +212,29 @@ def alignToGenomeIon(cfg):
    # make BAM index for IGV 
    cmd = samtoolsDir + "samtools index " + readSet + ".align.sorted.bam "
    subprocess.check_call(cmd, shell=True)
+
+
+def add_bam_tags(bamIn,bamOut,readSet):
+   ''' Add tags to bam
+   :param str bamIn : The input bam file to read
+   :param str bamOut : The output bam file to write
+   :param str readSet : The sample name
+   '''   
+   # create a dict of read id -> tag
+   umi_dict = {}
+   tag_name = "mi"
+   with open(readSet +  ".umi.tag.txt","r") as IN:
+      for line in IN:
+         read_id, umi = line.strip('\n').split('\t')
+         umi_dict[read_id] = umi
+
+   print "\nDone creating readID -> UMI  dict\n"
+
+   with pysam.AlignmentFile(bamIn,"rb") as IN, pysam.AlignmentFile(bamOut,"wb", template=IN) as OUT:
+      for read1 in IN:
+         temp_tags = read1.tags
+         umi_tag = umi_dict["@"+read1.qname]
+         temp_tags.append((tag_name,umi_tag))
+         read1.tags = tuple(temp_tags)
+         OUT.write(read1)
+      
