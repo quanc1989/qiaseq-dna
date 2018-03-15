@@ -134,10 +134,10 @@ def run(cfg):
 
    # set up metric names and values for output
    metricNames = ("UMIs", "read fragments"
-   ,"read fragments per MT, mean"
-   ,"read fragments per MT, 25th percentile"
-   ,"read fragments per MT, 50th percentile"
-   ,"read fragments per MT, 75th percentile"
+   ,"read fragments per UMI, mean"
+   ,"read fragments per UMI, 25th percentile"
+   ,"read fragments per UMI, 50th percentile"
+   ,"read fragments per UMI, 75th percentile"
    ,"sample fragment length, 25th percentile (bp)"
    ,"sample fragment length, 50th percentile (bp)"
    ,"sample fragment length, 75th percentile (bp)"
