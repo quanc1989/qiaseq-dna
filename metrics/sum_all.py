@@ -11,12 +11,11 @@ def run(cfg):
 
     # concatenate summary files
     with open(readSet + ".sumAll.summary.txt", "w") as OUT:
-        for fileType in ("prep", umiFilterFile, "sum.primer.umis", "umi_frags.len-distrib.txt", "sum.uniformity.primer", "umi_depths", "smCounter", "vcf_complex"):
+        for fileType in ("prep", "align", umiFilterFile, "umi_frags", "sum.uniformity.primer", "umi_depths", "smCounter", "vcf_complex"):
             '''
-            prep --> trimming metrics ; core/prep.py
+            prep, align --> trimming metrics ; core/prep.py, misc/tvc.py
             umiFilterFile --> primer finding metrics : core/umi_filter.py
-            sum.primer.umis --> umi information for each primer : metrics/sum_primer_umis.py
-            umi_frags.len-distrib.txt --> fragment length and reads per umi info: metrics/umi_frags.py
+            umi_frags --> reads per umi info : metrics/umi_frags.py
             umi_depths.summary.txt -->  umi depth and lod info : metrics/umi_depths.py
             smCounter --> metrics from smCounter : sm_counter_wrapper.py
             vcf_complex --> metrics from reconstructing complex variants from primitives : annotate/vcf_complex.py
