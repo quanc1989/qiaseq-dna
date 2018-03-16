@@ -1,5 +1,6 @@
-import sys
 import ConfigParser
+import sys
+import multiprocessing
 # our modules
 import core.run_log
 import core.run_config
@@ -25,8 +26,8 @@ import annotate.vcf_annotate
 #--------------------------------------------------------------------------------------
 # call input molecules, build consenus reads, align to genome, trim primer region
 #--------------------------------------------------------------------------------------
-def run(readSet, paramFile, vc):
-
+def run(args):
+   readSet, paramFile, vc = args
    # initialize logger
    core.run_log.init(readSet)
 
@@ -76,28 +77,19 @@ def run(readSet, paramFile, vc):
    # run smCounter variant calling
    numVariants = core.sm_counter_wrapper.run(cfg, paramFile, vc)
    
-   # create complex variants, and annotate using snpEff
-   if numVariants > 0:
-   
-      # convert nearby primitive variants to complex variants
-      bamFileIn  = readSet + ".bam"
-      vcfFileIn  = readSet + ".smCounter.cut.vcf"
-      vcfFileOut = readSet + ".smCounter.cplx.vcf"
-      annotate.vcf_complex.run(cfg, bamFileIn, vcfFileIn, vcfFileOut)
+   if not cfg.duplex.lower() == "false": # do not run smCounter for duplex reads
+      # create complex variants, and annotate using snpEff
+      if numVariants > 0:
+         # convert nearby primitive variants to complex variants
+         bamFileIn  = readSet + ".bam"
+         vcfFileIn  = readSet + ".smCounter.cut.vcf"
+         vcfFileOut = readSet + ".smCounter.cplx.vcf"
+         annotate.vcf_complex.run(cfg, bamFileIn, vcfFileIn, vcfFileOut)
          
-      # annotate variants in the VCF file
-      vcfFileIn  = readSet + ".smCounter.cplx.vcf"
-      vcfFileOut = readSet + ".smCounter.anno.vcf"
-      annotate.vcf_annotate.run(cfg, vcfFileIn, vcfFileOut,vc)
-
-   if cfg.sampleType.lower() == "tumor":  ## the assumption is that the normal sample has already been run
-      core.tumor_normal.removeNormalVariants(cfg)
-
-   if cfg.runCNV.lower() == "true": # run copy number analysis
-      print "Running quandico"
-      # only run once for a readSet (this function gets called twice for tumor-normal)
-      if cfg.sampleType.lower() == "single" or cfg.sampleType.lower() == "tumor":
-         core.tumor_normal.runCopyNumberEstimates(cfg)
+         # annotate variants in the VCF file
+         vcfFileIn  = readSet + ".smCounter.cplx.vcf"
+         vcfFileOut = readSet + ".smCounter.anno.vcf"
+         annotate.vcf_annotate.run(cfg, vcfFileIn, vcfFileOut,vc)        
    
    # aggregate all summary metrics
    metrics.sum_all.run(cfg)
@@ -129,19 +121,33 @@ def run_tumor_normal(readSet,paramFile,vc):
                tumor = section
 
    assert tumor!=None and normal!=None, "Could not sync read set names supplied with config file !"
-   run(normal,paramFile,vc)
-   run(tumor,paramFile,vc)
+   
+   p = multiprocessing.Pool(2)
+   p.map(run,[(normal,paramFile,vc),(tumor,paramFile,vc)])
+   p.close()
+   p.join()
+   ## Additional analysis steps
+   cfg = core.run_config.run(tumor,paramFile)
+   core.tumor_normal.removeNormalVariants(cfg)
+   core.tumor_normal.runCopyNumberEstimates(cfg)
 
 #-------------------------------------------------------------------------------------
 # main program for running from shell 
 #-------------------------------------------------------------------------------------
 if __name__ == "__main__":
+
+   if len(sys.argv) != 5 :
+      print "\nRun as : python run_qiaseq_dna.py <param_file> <v1/v2> <single/tumor-normal> <readSet>\n"
+      sys.exit(-1)
+
    paramFile = sys.argv[1]
    vc = sys.argv[2]
    analysis = sys.argv[3]
    readSet   = " ".join(sys.argv[4:]) # 2 readSets in case of tumor-normal
 
-   if analysis == "tumor-normal":      
+   if analysis.lower() == "tumor-normal":      
       run_tumor_normal(readSet,paramFile,vc)
    else: # Single sample, might still need to run quandico
-      run(readSet,paramFile,vc)
+      run((readSet,paramFile,vc))
+      cfg = core.run_config.run(readSet,paramFile)
+      tumor_normal.runCopyNumberEstimates(cfg)

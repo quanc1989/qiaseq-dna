@@ -5,6 +5,8 @@ import string
 def runCopyNumberEstimates(cfg):
    ''' Run CNV analysis using quandico
    '''
+   if cfg.runCNV.lower() == "false":
+      return
    referenceUmiFiles = cfg.referenceUmiFiles.split(",")
    assert len(referenceUmiFiles) >= 1, "No reference UMI Files supplied !"
     

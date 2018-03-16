@@ -21,6 +21,8 @@ def run(readSet,paramFile):
 
    # use all cores if numCores = 0
    if int(cfg.numCores) == 0:
+      if cfg.sampleType.lower() in ['normal','tumor']: # use half the cores for tumor normal readSets
+         cfg.numCores = str(cpu_count()/2)
       cfg.numCores = str(cpu_count())
 
    # convert some params to boolean
