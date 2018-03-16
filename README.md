@@ -9,7 +9,9 @@ The top level script run_qiaseq_dna.py process reads in fastq format to produce 
 
 The smCounter variant caller uses a statistical model that requires both raw sequencer base calls and identification of unique input molecules using the UMI tag and the genome position of the random fragmentation site.
 
-smCounter-v2 publication is under review.
+smCounter-v2 publication is under review. The pre-print is available here :
+
+https://www.biorxiv.org/content/early/2018/03/14/281659
 
 There are additional scripts under misc_workflow/ which contain the following :
 
