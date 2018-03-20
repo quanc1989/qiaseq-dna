@@ -9,7 +9,8 @@ javaExe     = /opt/conda/jre/bin/java
 sswPyFile = /srv/qgen/bin/ssw/src/ssw_wrap.py
 
 # Ion torrent tools
-torrentBinDir = /srv/qgen/bin/TorrentSuite
+torrentBinDir = /srv/qgen/bin/TorrentSuite/
+vcflibDir = /srv/qgen/bin/vcflib/bin/
 
 # quandico
 quandicoDir = /srv/qgen/code/qiaseq-dna/quandico/
@@ -25,7 +26,6 @@ trimScript = /srv/qgen/code/qiaseq-dna/core/prep_trim.py
 
 # geneome file
 genomeFile = /srv/qgen/data/genome/ucsc.hg19.fa
-torrentGenomeFile = /srv/qgen/data/genome_tmap/ucsc.hg19.fa
 
 # umi module
 endogenousLenMin = 15
