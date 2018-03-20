@@ -156,7 +156,7 @@ def verifyCluster(bam, cluster, genomeFile):
 
          # if the current variant is the last in the cluster, reconstruct the complex variant and output
          if d == len(cluster) - 1:  
-            outlines.append(recon(cluster, combined, genomeFile)) 
+            outlines.append(recon(cluster, combined, genomeFile,vc)) 
 
       # no link to previous variant
       else:
@@ -170,7 +170,7 @@ def verifyCluster(bam, cluster, genomeFile):
 
          # end of a potential complex variant
          else:
-            outlines.append(recon(cluster, combined, genomeFile))
+            outlines.append(recon(cluster, combined, genomeFile,vc))
 
          # reset combined, starting from the current variant
          combined = [d]
@@ -180,7 +180,7 @@ def verifyCluster(bam, cluster, genomeFile):
 #----------------------------------------------------------------------------------------------
 # main function
 #----------------------------------------------------------------------------------------------
-def run(cfg, bamFileIn, vcfFileIn, vcfFileOut):
+def run(cfg, bamFileIn, vcfFileIn, vcfFileOut,vc):
    # log start for pipeline use
    print("vcf_complex: start conversion from primitive to complex representation...")
 
