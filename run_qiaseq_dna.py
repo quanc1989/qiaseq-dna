@@ -92,7 +92,7 @@ def run(args):
          bamFileIn  = readSet + ".bam"
          vcfFileIn  = readSet + ".smCounter.cut.vcf"
          vcfFileOut = readSet + ".smCounter.cplx.vcf"
-         annotate.vcf_complex.run(cfg, bamFileIn, vcfFileIn, vcfFileOut)
+         annotate.vcf_complex.run(cfg, bamFileIn, vcfFileIn, vcfFileOut, vc)
          
          # annotate variants in the VCF file
          vcfFileIn  = readSet + ".smCounter.cplx.vcf"

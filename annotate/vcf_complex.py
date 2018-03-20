@@ -4,7 +4,7 @@ import pysam
 #----------------------------------------------------------------------------------------------
 # Reconstruct complex variants from primitives
 #----------------------------------------------------------------------------------------------
-def recon(cluster, combined, genomeFile):
+def recon(cluster, combined, genomeFile, vc):
    refseq = pysam.FastaFile(genomeFile)
    lastR = -1
    refStr = ''
@@ -16,7 +16,10 @@ def recon(cluster, combined, genomeFile):
          refStr += tmpRef
          refAlt += tmpAlt
          finalPos = tmpPos # temporary starting position of the complex variant/mnp
-         finalPI = int(tmpPI) # temporary prediction index of the complex variant/mnp
+         if vc.lower() == 'v1':
+            finalPI = int(tmpPI) # temporary prediction index of the complex variant/mnp
+         else:
+            finalPI = float(tmpPI) # QUAL
          finalID = tmpID 
          finalInfo = tmpInfo # use the info of first variant as the cluster info
          finalFmt  = tmpFmt

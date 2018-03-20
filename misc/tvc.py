@@ -429,7 +429,7 @@ def smCounterFilter(cfg,vc):
          if vc.lower() == "v1":
             CHROM,POS,REF,ALT,TYPE,DP,MT,UMT,PI,THR,VMT,VMF,VSM,FILTER = line2.strip().split("\t")
          else:
-            CHROM,POS.REF.ALT.TYPE.DP,VDP,VAF,UMT,VMT,VMF,QUAL,FILTER = line2.strip().split("\t")
+            CHROM,POS,REF,ALT,TYPE,DP,VDP,VAF,UMT,VMT,VMF,QUAL,FILTER = line2.strip().split("\t")
          
          # debug check
          if chrom != CHROM or pos != POS or ref != REF or alt != ALT or filter != FILTER:
