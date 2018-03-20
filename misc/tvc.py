@@ -530,7 +530,7 @@ def smCounterFilter(cfg,vc):
          if vc.lower() == "v1":
             line2 = "\t".join((chrom,pos,ref,alt,TYPE,DP,MT,UMT,PI,THR,VMT,VMF,VSM,filter)) + "\n"
          else:
-            line2 = "\t".join((chrom,pos,ref,alt,TYPE.DP,VDP,VAF,UMT,VMT,VMF,QUAL,FILTER)) + "\n"
+            line2 = "\t".join((chrom,pos,ref,alt,TYPE,DP,VDP,VAF,UMT,VMT,VMF,QUAL,filter)) + "\n"
          
          # smCounter primitives match TVC - keep this variant
          if keepVariant:
