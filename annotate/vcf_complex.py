@@ -60,7 +60,7 @@ def recon(cluster, combined, genomeFile, vc):
 #----------------------------------------------------------------------------------------------
 # Verify complex variants and MNPs
 #----------------------------------------------------------------------------------------------
-def verifyCluster(bam, cluster, genomeFile):
+def verifyCluster(bam, cluster, genomeFile, vc):
    # debug check
    if len(cluster) == 1:
       raise Exception("Need at least two variants")
@@ -256,7 +256,7 @@ def run(cfg, bamFileIn, vcfFileIn, vcfFileOut,vc):
          if len(cluster) == 1:
             outlines.append(cluster[0][0:10])
          else:
-            outInfo = verifyCluster(bamFileIn, cluster, genomeFile)
+            outInfo = verifyCluster(bamFileIn, cluster, genomeFile, vc)
             outlines.extend(outInfo)
             cnt += 1
 
@@ -272,7 +272,7 @@ def run(cfg, bamFileIn, vcfFileIn, vcfFileOut,vc):
    elif len(cluster) == 1:
       outlines.append(cluster[0][0:10])
    else:
-      outInfo = verifyCluster(bamFileIn, cluster, genomeFile)
+      outInfo = verifyCluster(bamFileIn, cluster, genomeFile, vc)
       outlines.extend(outInfo)
       cnt += 1
 
