@@ -1,6 +1,44 @@
 import math
 
 #----------------------------------------------------------------------------
+# get read-per-barcode metrics
+def getRpmtMetrics(readCounts):
+
+   # handle zero MTs case
+   if len(readCounts) == 0:
+      outvec = tuple([0] * 6)
+      return outvec
+   
+   # main metrics
+   totalReads = sum(readCounts)
+   totalMts = len(readCounts)
+   rpmtMean = round(1.00 * sum(readCounts) / len(readCounts), 1)
+   
+   # sort read counts
+   readCounts.sort()
+   
+   # get percentiles
+   pctiles = []
+   for pct in (25,50,75):
+      k = pct * 0.01 * (len(readCounts)-1)
+      f = math.floor(k)
+      c = math.ceil(k)
+      if f == c:
+         pctile = readCounts[int(k)]
+      else:
+         d0 = readCounts[int(f)] * (c - k)
+         d1 = readCounts[int(c)] * (k - f)
+         pctile = d0 + d1
+      pctiles.append(int(round(pctile)))
+      
+   # done
+   outvec = [totalMts, totalReads, rpmtMean]
+   outvec.extend(pctiles)
+   outvec = tuple(outvec)
+   return outvec
+
+
+#----------------------------------------------------------------------------
 # main function
 def run(cfg):
    print("sum_primer_umis starting...")
@@ -34,3 +72,26 @@ def run(cfg):
    fileout.write("|")
    fileout.write("|".join(metricNames))
    fileout.write("\n")
+
+   # for each primer, get read per MT metrics
+   mtListAllPrimers = []
+   for (primer, primerVec) in primers.iteritems():
+   
+      # unpack primer vec
+      (strand, chrom, loc5, loc3, mtList) = primerVec
+      
+      # get read-per-barcode metrics
+      metricVals = getRpmtMetrics(mtList)
+      
+      # output
+      outrow = [readSet, primer]
+      outrow.extend(primerVec[0:-1])  # dropping the MT list now
+      outrow.extend(metricVals)
+      outrow = (str(x) for x in outrow)
+      fileout.write("|".join(outrow))
+      fileout.write("\n")
+      
+      # save all-primers MT list
+      mtListAllPrimers.extend(mtList)
+      
+   fileout.close()
