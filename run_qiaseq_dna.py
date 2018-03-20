@@ -19,6 +19,7 @@ import metrics.sum_primer_umis
 import metrics.sum_all
 import metrics.umi_frags
 import metrics.umi_depths
+import misc.process_ion
 import misc.tvc
 import annotate.vcf_complex
 import annotate.vcf_annotate
@@ -36,7 +37,7 @@ def run(args):
 
    if cfg.platform.lower() == "illumina":
 
-      if cfg.duplex.lower() == True: ## Duplex sequencing run
+      if cfg.duplex.lower() == "true": ## Duplex sequencing run
          pass
 
       # trim 3' ends of both reads, and extract UMI sequence
@@ -48,8 +49,8 @@ def run(args):
       bamFileOut  = readSet + ".align.bam"
       core.align.run(cfg, readFileIn1, readFileIn2, bamFileOut)
    else:
-      misc.tvc.trimIon(cfg)
-      misc.tvc.alignToGenomeIon(cfg)
+      misc.process_ion.trimIon(cfg)
+      misc.process_ion.alignToGenomeIon(cfg)
 
    # call putative unique input molecules using BOTH UMI seq AND genome alignment position on random fragmentation side
    bamFileIn  = readSet + ".align.bam"
@@ -72,12 +73,19 @@ def run(args):
    # sort the final BAM file, to prepare for downstream variant calling
    bamFileIn  = readSet + ".primer_clip.bam"
    bamFileOut = readSet + ".bam"
-   core.samtools.sort(cfg,bamFileIn,bamFileOut)
-   
-   # run smCounter variant calling
-   numVariants = core.sm_counter_wrapper.run(cfg, paramFile, vc)
-   
-   if not cfg.duplex.lower() == "false": # do not run smCounter for duplex reads
+   core.samtools.sort(cfg,bamFileIn,bamFileOut)   
+  
+   if cfg.duplex.lower() == "false": # do not run smCounter for duplex reads
+
+      if cfg.platform.lower() != "illumina": # ion reads
+         misc.tvc.run(cfg)
+
+      # run smCounter variant calling
+      numVariants = core.sm_counter_wrapper.run(cfg, paramFile, vc)
+      
+      if cfg.platform.lower() != "illumina":
+         numVariants = misc.tvc.smCounterFilter(cfg,vc)
+
       # create complex variants, and annotate using snpEff
       if numVariants > 0:
          # convert nearby primitive variants to complex variants
