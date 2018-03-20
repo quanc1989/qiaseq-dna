@@ -403,13 +403,13 @@ def smCounterFilter(cfg,vc):
    print("tvc: TVC primitive variants: {}".format(len(tvcPrimitives)))
    
    # loop over smCounter variants, for each check if all primitives are in the TVC primitives hash
-   lowPISuffix = ".smCounter.GT12PI" if vc.lower() == "v1" else ".smCounter.lowPI"
+   lowQSuffix = ".smCounter.GT12PI" if vc.lower() == "v1" else ".smCounter.lowQ"
 
-   shutil.copyfile(readSet + lowPISuffix + ".txt", readSet + lowPISuffix + ".tmp.txt")
+   shutil.copyfile(readSet + lowQSuffix + ".txt", readSet + lowQSuffix + ".tmp.txt")
    fileIn2  = open(readSet + ".smCounter.cut.txt", "r")
    fileOut1 = open(readSet + ".smCounter.cut.tmp.vcf", "w")
    fileOut2 = open(readSet + ".smCounter.cut.tmp.txt", "w")
-   fileOut3 = open(readSet + lowPISuffix + ".tmp.txt", "a")
+   fileOut3 = open(readSet + lowQSuffix + ".tmp.txt", "a")
    numVariantsRetained = 0
    numVariantsFiltered = 0
    for line in open(readSet + ".smCounter.cut.vcf", "r"):
@@ -538,7 +538,7 @@ def smCounterFilter(cfg,vc):
             fileOut2.write(line2)
             numVariantsRetained += 1
             
-         # variant not in TVC primitives - move to GT12PI/lowPI supplement text file
+         # variant not in TVC primitives - move to GT12PI/lowQ supplement text file
          else:
             fileOut3.write(line2)
             numVariantsFiltered += 1
@@ -551,7 +551,7 @@ def smCounterFilter(cfg,vc):
    fileOut3.close()
 
    # rename the files for downstream use
-   for suffix in (".smCounter.cut.tmp.vcf",".smCounter.cut.tmp.txt",lowPISuffix+".tmp.txt"):
+   for suffix in (".smCounter.cut.tmp.vcf",".smCounter.cut.tmp.txt",lowQSuffix+".tmp.txt"):
       fileNameSrc = readSet +  suffix
       fileNameDes = fileNameSrc.replace(".tmp.", ".")
       fileNameBak = fileNameSrc.replace(".tmp.", ".old.")
