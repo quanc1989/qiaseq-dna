@@ -144,8 +144,8 @@ def run_tumor_normal(readSet,paramFile,vc):
 #-------------------------------------------------------------------------------------
 if __name__ == "__main__":
 
-   if len(sys.argv) != 5 :
-      print "\nRun as : python run_qiaseq_dna.py <param_file> <v1/v2> <single/tumor-normal> <readSet>\n"
+   if len(sys.argv) > 6 :
+      print "\nRun as : python run_qiaseq_dna.py <param_file> <v1/v2> <single/tumor-normal> <readSet(s)>\n"
       sys.exit(-1)
 
    paramFile = sys.argv[1]
