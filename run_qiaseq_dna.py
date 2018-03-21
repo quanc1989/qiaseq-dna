@@ -129,11 +129,9 @@ def run_tumor_normal(readSet,paramFile,vc):
                tumor = section
 
    assert tumor!=None and normal!=None, "Could not sync read set names supplied with config file !"
-   
-   p = multiprocessing.Pool(2)
-   p.map(run,[(normal,paramFile,vc),(tumor,paramFile,vc)])
-   p.close()
-   p.join()
+  
+   run((normal,paramFile,vc))
+   run((tumor,paramFile,vc))
    ## Additional analysis steps
    cfg = core.run_config.run(tumor,paramFile)
    core.tumor_normal.removeNormalVariants(cfg)

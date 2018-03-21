@@ -18,13 +18,10 @@ def run(readSet,paramFile):
             raise Exception("Config file contains duplicate specification of parameter: " + paramName)
          cfg.__dict__[paramName] = paramVal
          print(paramName, paramVal)
-
+         
    # use all cores if numCores = 0
-   if int(cfg.numCores) == 0:
-      if cfg.sampleType.lower() in ['normal','tumor']: # use half the cores for tumor normal readSets
-         cfg.numCores = str(cpu_count()/2)
-      cfg.numCores = str(cpu_count())
-
+   cfg.numCores = str(cpu_count())
+   
    # convert some params to boolean
    cfg.deleteLocalFiles = cfg.deleteLocalFiles.lower() == "true"
 
