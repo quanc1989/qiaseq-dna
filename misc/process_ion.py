@@ -144,7 +144,7 @@ def alignToGenomeIon(cfg):
    samtoolsDir = cfg.samtoolsDir
    samtoolsMem = cfg.samtoolsMem
    torrentBinDir = cfg.torrentBinDir
-   torrentGenomeFile = cfg.torrentGenomeFile
+   torrentGenomeFile = cfg.genomeFile
    tmap = os.path.join(torrentBinDir,"tmap")
    # align full-length reads to reference genome using TMAP
    cmd = "{} mapall -n {} -r {}.trimmed.R1.fastq -f {} -v -Y -u --prefix-exclude 5 -o 2 stage1 map4 > ".format(tmap,numCpus,readSet,torrentGenomeFile) \

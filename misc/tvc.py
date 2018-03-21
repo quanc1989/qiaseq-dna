@@ -273,7 +273,7 @@ def run(cfg):
    # run TVC
    roiBedFile = cfg.roiBedFile
    torrentBinDir     = cfg.torrentBinDir
-   torrentGenomeFile = cfg.torrentGenomeFile
+   torrentGenomeFile = cfg.genomeFile
    torrentVcfFile = readSet + ".tvc.vcf"
    cmd = os.path.join(torrentBinDir , "tvc") + " --output-dir _TVC_ " \
     + " -n " + numCpus \
