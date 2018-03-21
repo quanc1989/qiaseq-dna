@@ -7,7 +7,7 @@ def runCopyNumberEstimates(cfg):
    '''
    if cfg.runCNV.lower() == "false":
       return
-   referenceUmiFiles = cfg.referenceUmiFiles.split(",")
+   referenceUmiFiles = cfg.refUmiFiles.split(",")
    assert len(referenceUmiFiles) >= 1, "No reference UMI Files supplied !"
     
    # read reference UMI counts, normalize by read set, and get median for each primer across read sets (not necessary for only one reference read set)

@@ -158,4 +158,4 @@ if __name__ == "__main__":
    else: # Single sample, might still need to run quandico
       run((readSet,paramFile,vc))
       cfg = core.run_config.run(readSet,paramFile)
-      tumor_normal.runCopyNumberEstimates(cfg)
+      core.tumor_normal.runCopyNumberEstimates(cfg)
