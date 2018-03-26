@@ -18,9 +18,10 @@ def run(readSet,paramFile):
             raise Exception("Config file contains duplicate specification of parameter: " + paramName)
          cfg.__dict__[paramName] = paramVal
          print(paramName, paramVal)
-         
-   # use all cores if numCores = 0
-   cfg.numCores = str(cpu_count())
+
+   if str(cfg.numCores) == '0':      
+      # use all cores if numCores = 0
+      cfg.numCores = str(cpu_count())
    
    # convert some params to boolean
    cfg.deleteLocalFiles = cfg.deleteLocalFiles.lower() == "true"
