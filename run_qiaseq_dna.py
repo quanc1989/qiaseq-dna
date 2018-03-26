@@ -5,6 +5,7 @@ import multiprocessing
 import core.run_log
 import core.run_config
 import core.prep
+import core.prep_trim_duplex
 import core.align
 import core.umi_filter
 import core.umi_mark
@@ -38,10 +39,10 @@ def run(args):
    if cfg.platform.lower() == "illumina":
 
       if cfg.duplex.lower() == "true": ## Duplex sequencing run
-         pass
-
-      # trim 3' ends of both reads, and extract UMI sequence
-      core.prep.run(cfg)
+         core.prep_trim_duplex.trimDuplex(cfg)
+      else:
+         # trim 3' ends of both reads, and extract UMI sequence
+         core.prep.run(cfg)
    
       # align trimmed reads to genome using BWA MEM
       readFileIn1 = readSet + ".prep.R1.fastq"
