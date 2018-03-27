@@ -12,7 +12,7 @@ WINDOW_OFFSET = 3
 #------------------------------------------------------------------------------------------------------------------------------------
 # handle reads for one putative original input molecule
 #------------------------------------------------------------------------------------------------------------------------------------
-def handleOneMolecule(alignments, fileout):
+def handleOneMolecule(alignments, fileout1, fileout2):
 
    # nothing to do yet
    if len(alignments) == 0:
@@ -24,11 +24,16 @@ def handleOneMolecule(alignments, fileout):
    # add read index with this molecule and output, and tag innner-priming resampling (putative)
    pLoc5Original = None
    mtReadIdx = 0
+
+   maxFragLen = 0
+   fragPrimer = None
+   
    for vec in alignments:
 
       # unpack input
       (pChrom, pStrand, mtLoc, mt, mtReads, fragLen, pLoc5, primer, umiSeq, alignLocR, alignLocP, readId, read1L, read1R, cigar1, read2L, read2R, cigar2) = vec
-      
+
+     
       # mark resampling internal-priming reads
       if mtReadIdx == 0:
          pLoc5Original = pLoc5
@@ -36,9 +41,23 @@ def handleOneMolecule(alignments, fileout):
       
       # output
       vec = (pChrom, pStrand, mtLoc, mt, mtReads, mtReads_, mtReadIdx, isResample, fragLen, pLoc5, primer, umiSeq, alignLocR, alignLocP, readId, read1L, read1R, cigar1, read2L, read2R, cigar2)
-      fileout.write("|".join((str(x) for x in vec)))
-      fileout.write("\n")
+      fileout1.write("|".join((str(x) for x in vec)))
+      fileout1.write("\n")
       mtReadIdx += 1
+
+      # identify primer causing longest fragment
+      if fragLen > maxFragLen:
+         maxFragLen = fragLen
+         fragPrimer = (primer,pLoc5)
+         
+
+   # write file used by sum.primer.umis.py to disk
+   (primer, primerLoc5)  = fragPrimer
+   outvec = (pChrom, pStrand, mtLoc, mt, mtReads, mtReads_, mtReadIdx, isResample, maxFragLen, primer, primerLoc5)
+   outvec = (str(x) for x in outvec)
+   fileout2.write("|".join(outvec))
+   fileout2.write("\n")
+      
 
    # debug check - some conflicting evidence for molecule call - caused by (1) imperfection in this algorithm or (2) normal expected random collisions at high depths
    #if mtReads_ != mtReads:
@@ -47,7 +66,7 @@ def handleOneMolecule(alignments, fileout):
 #------------------------------------------------------------------------------------------------------------------------------------
 # handle reads with randomly fragmented side at mapped to approximately same (+/- 3 bp) genome locus
 #------------------------------------------------------------------------------------------------------------------------------------
-def handleOneLocus(buffers, fileout):
+def handleOneLocus(buffers, fileout1, fileout2):
    # debug print
    #print("********************", buffers.end1, len(buffers.mts0),len(buffers.mts1), len(buffers.buffer0), len(buffers.buffer1))
    
@@ -105,7 +124,7 @@ def handleOneLocus(buffers, fileout):
       if mt != mtLast:
       
          # process UMI worth of reads
-         handleOneMolecule(alignments, fileout)
+         handleOneMolecule(alignments, fileout1, fileout2)
          
          # prepare for next UMI
          mtLast = mt
@@ -115,7 +134,7 @@ def handleOneLocus(buffers, fileout):
       alignments.append(vec)
 
    # process the final UMI
-   handleOneMolecule(alignments, fileout)
+   handleOneMolecule(alignments, fileout1, fileout2)
       
    # buffer0: clear for next iteration
    del(buffer0[:])
@@ -156,7 +175,8 @@ def run(cfg):
    print("umi_mark: done sorting read alignments by random fragmentation position")
    
    # open output file
-   fileout = open(readSet + ".umi_mark.alignments.txt"  , "w")
+   fileout1 = open(readSet + ".umi_mark.alignments.txt"  , "w")
+   fileout2 = open(readSet + ".umi_mark.for.sum.primer.txt","w")
 
    # read on-target read pair alignment positions (already sorted by random fragment locus), buffer by locus
    buffers = lambda:0
@@ -185,11 +205,11 @@ def run(cfg):
 
       # process buffer 1 if this read is past end of accumulation window or chrom/strand change
       if alignLocR >= buffers.end1 or chromStrand != chromStrandLast:
-         handleOneLocus(buffers, fileout)
+         handleOneLocus(buffers, fileout1, fileout2)
 
          # do again if current read is beyond end of new window or chrom/strand change (this processes buffer 0, now called buffer 1 after previous handleOneLocus() call)
          if alignLocR >= buffers.end1 or chromStrand != chromStrandLast:
-            handleOneLocus(buffers, fileout)
+            handleOneLocus(buffers, fileout1, fileout2)
             del(buffers.buffer0[:])
             del(buffers.buffer1[:])
             buffers.end1 = alignLocR + WINDOW_SIZE
@@ -204,9 +224,10 @@ def run(cfg):
 
    # process last two windows
    if buffers.end1 != None:
-      handleOneLocus(buffers, fileout)
-      handleOneLocus(buffers, fileout)
+      handleOneLocus(buffers, fileout1, fileout2)
+      handleOneLocus(buffers, fileout1, fileout2)
       
    # done
-   fileout.close()
+   fileout1.close()
+   fileout2.close()
    print("umi_mark: done")
