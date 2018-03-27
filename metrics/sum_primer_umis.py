@@ -1,4 +1,5 @@
 import math
+from collections import defaultdict
 
 #----------------------------------------------------------------------------
 # get read-per-barcode metrics
@@ -54,11 +55,15 @@ def run(cfg):
       primers[primer] = (strand, chrom, loc5, loc3, [])
 
    # get MTs and supporting read counts from disk
+   primer_umi_count = defaultdict(lambda:defaultdict(int))
    for line in open(readSet + ".umi_mark.alignments.txt", "r"):
-      (chrom, strand, mtLoc, mt, numReads, numAlignments, mtReadIdx, isResample, fragLen, primerLoc5, primer, umiSeq, alignLocR, alignLocP, readId, read1L, read1R, cigar1, read2L, read2R, cigar2) = line.strip().split("|")
-      (strand, chrom, loc5, loc3, mtList) = primers[primer]
-      mtList.append(int(numReads))
-
+      (chrom, strand, umiLoc, umi, numReads, numAlignments, mtReadIdx, isResample, fragLen, primerLoc5, primer, umiSeq, alignLocR, alignLocP, readId, read1L, read1R, cigar1, read2L, read2R, cigar2) = line.strip().split("|")
+      primer_umi_count[primer][umi]+=1
+      
+   for primer in primer_umi_count:
+      for umi in primer_umi_count[primer]:
+         primers[primer][-1].append(primer_umi_count[primer][umi])
+         
    # define metric names
    metricNames = ("UMIs", "read fragments"
    ,"read fragments per UMI, mean"
