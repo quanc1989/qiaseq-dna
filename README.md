@@ -47,7 +47,7 @@ The python modules in this repository have many dependencies on third-party NGS 
 sudo docker pull rpadmanabhan9/qiaseq-dna:pipeline
 
 ### Run a container from the image above interactively, mounting your run directory i.e. directory where the output files will be created
-sudo docker run -it -v /home/your_fav_dir/:/mnt/qiaseq-run/ rpadmanabhan9/qiaseq-dna
+sudo docker run -it -v /home/your_fav_dir/:/mnt/qiaseq-run/ rpadmanabhan9/qiaseq-dna:pipeline
 
 ### Change directory and get the latest code from github
 cd /srv/qgen/code/
@@ -60,7 +60,7 @@ cp /srv/qgen/code/qiaseq-dna/run_sm_counter_v1.params.txt ./
 ### Edit the bottom of run_consensus.params.txt if you need to change the read set and primer file
 
 ### Run the pipeline
-python /srv/qgen/code/qiaseq-dna/run_consensus.py run_sm_counter_v1.params.txt v1 single NEB_S2 > run.log 2>&1 &  
+python /srv/qgen/code/qiaseq-dna/run_qiaseq_dna.py run_sm_counter_v1.params.txt v1 single NEB_S2 > run.log 2>&1 &  
 
 The parameters are explained below :
 run_sm_counter_v1.params.txt : The config file with prepopulated parameters.
