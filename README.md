@@ -67,6 +67,20 @@ run_sm_counter_v1.params.txt : The config file with prepopulated parameters.
 v1 : smCounter variant caller version to use. You can specify v1 or v2. Please use run_sm_counter_v2.params.txt if specifying v2.
 single : Whether this is a single read set analysis or tumor-normal.
 NEB_S2 : Corresponds to the name of the readSet, should match the section in the params file. For tumor-normal analysis please specify the two read set names delimited by a space.
+
+For ion torrent reads
+### convert unmapped bam to fastq, this can be done inside the container
+bedtools bamtofastq -i {ubam} -fq {fastq1}
+uBam : your unmapped bam file
+fastq1 : R1 fastq file name
+
+Update the parameters in the config file :
+uBam: Add a new parameter in the readSet section in the bottom with the path to the unmapped bam file
+readFile1: Should be the R1 fastq obtained from the above bedtools command
+readFile2: Replace 'R1' with 'R2' in readFile1 
+platform: Change this to IonTorrent
+
+Run the python script run_qiaseq_dna.py as before
 ```
 The dependencies are fully documented in the Dockerfile in this repository.
 
