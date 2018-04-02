@@ -151,6 +151,9 @@ def run(cutadaptDir,tagNameUmiSeq,tagNamePrimer,tagNamePrimerErr,primerFasta,pri
          if primer3Bases == -1 or primer3Bases > len(seq):
             seq1 = seq + seqR
             bq1  =  bq + bqR
+         elif primer3Bases == 0:
+            seq1 = seqR
+            bq1  = bqR
          else:
             seq1 = seq[-primer3Bases:] + seqR         
             bq1  =  bq[-primer3Bases:] + bqR

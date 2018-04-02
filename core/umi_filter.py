@@ -222,7 +222,7 @@ def run(cfg,bamFileIn):
          alignLoc = read1.aend - 1 #  0-based position of the 5' end of the read
          alignCigar.reverse()
       
-      # check if nead a primer site     
+      # check if near a primer site     
       primer_ = None
       for offset in range(-5,6):    #(0,1,-1):
          designLoc = alignLoc + offset + primerOffset
