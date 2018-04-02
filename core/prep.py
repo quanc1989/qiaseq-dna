@@ -89,6 +89,10 @@ def run(cfg):
    deleteLocalFiles = cfg.deleteLocalFiles
    numCores         = int(cfg.numCores)
    tagNameUmiSeq    = cfg.tagNameUmiSeq
+   tagNamePrimer    = cfg.tagNamePrimer
+   tagNamePrimerErr = cfg.tagNamePrimerErr
+   primerFile       = cfg.primerFile
+   primer3Bases     = int(cfg.primer3Bases)
    
    # set output file prefix
    filePrefixOut = readSet + ".prep"
@@ -137,11 +141,27 @@ def run(cfg):
    if numReads1 == 0:
       raise UserWarning("prep: input read files are empty!")
 
+   # make primer fasta for primer search
+   primerSeqs = []
+   primerFasta = "prep.primer.fa"
+   primerFastaOut = open(primerFasta, "w")
+   for line in open(primerFile, "r"):      
+      (chrom, loc3, direction, primer) = line.strip().split("\t")
+      
+      # debug check (need to modify code to handle same primer for multiple design loci)
+      if primer in primerSeqs:
+         raise Exception("ERROR: duplicate primer specification! " + primer)     
+      primerSeqs.append(primer)
+
+      primerStrand = "0" if direction == "L" or direction == "0" else "1"
+      primerFastaOut.write(">" + "-".join((chrom, direction, loc3)) + "\n" + "^" + primer + "\n")
+   primerFastaOut.close()
+      
    # set up trimming work to be run in parallel sub-processes, using another python script
    workIn = []
    for batchNum in range(numBatches):
       filePrefixBatch = "{}.{:04d}".format(filePrefixOut,batchNum)
-      cmd = "python {0} {1} {2} {3} > {3}.log 2>&1 ".format(trimScript,cutadaptDir,tagNameUmiSeq,filePrefixBatch)
+      cmd = "python {0} {1} {2} {3} {4} {5} {6} {7} > {7}.log 2>&1 ".format(trimScript,cutadaptDir,tagNameUmiSeq,tagNamePrimer,tagNamePrimerErr,primerFasta,primer3Bases,filePrefixBatch)
       workIn.append(cmd)
       
    # run cutadapt and UMI extraction in parallel sub-processes
@@ -211,7 +231,7 @@ if __name__ == "__main__":
    cfg.readFile2 = "/mnt/webserver/datadisk/resources/jdicarlo/NEB_S2_L001_R2_001.fastq.gz"
    cfg.cutadaptDir = "/srv/qgen/bin/cutadapt-1.10/"
    cfg.trimScript  = "prep_trim.py"
-   cfg.tagNameUmiSeq = "mi"
    cfg.numCores  = "32"
    cfg.deleteLocalFiles = True
+   cfg.primer3Bases = -1   
    run(cfg)

@@ -22,7 +22,7 @@ def runShellCommand(cmd):
       raise(ex)
 
 #-------------------------------------------------------------------------------------
-def run(cutadaptDir,umiTagName,filePrefix):
+def run(cutadaptDir,tagNameUmiSeq,tagNamePrimer,tagNamePrimerErr,primerFasta,primer3Bases,filePrefix):
 
    # split read set name from input file directory (NOTE: ".R1.fastq" and ".R2.fastq" are required file suffixes here!)
    dirIn, filePrefix = os.path.split(filePrefix)
@@ -85,7 +85,7 @@ def run(cutadaptDir,umiTagName,filePrefix):
             linesR2[3] = linesR2[3][24:]
 
          # make a UMI tag
-         umiTag = umiTagName + ":Z:" + umiSeq
+         umiTag = tagNameUmiSeq + ":Z:" + umiSeq
             
          # add barcode to R1 id line
          line = linesR1[0]
@@ -112,23 +112,93 @@ def run(cutadaptDir,umiTagName,filePrefix):
          del(linesR1[:])
          del(linesR2[:])
    
+   fileOut1.close()
+   fileOut2.close()
+   
    # write summary file 
    fileOut = open(filePrefix + ".prep_trim.summary.txt", "w")
    fileOut.write("{}\tread fragments total\n".format(numReadPairsTotal))
    fileOut.write("{}\tread fragments dropped, less than 40 bp\n".format(numReadPairsDropped))
-   fileOut.close()   
+   fileOut.close()
+
+   # trim R1 reads 5' end, primer sequence search (SPE side)
+   cmd  = cutadaptDir + "cutadapt -e 0.1 -O 16 -m 1 " \
+        + "-g file:" + primerFasta + " -n 1 " \
+        + "-o "          + filePrefix + ".temp2.R1.fastq " \
+        + "--info-file " + filePrefix + ".temp2.R1.txt " \
+                         + filePrefix + ".temp1.R1.fastq"
+   runShellCommand(cmd)
+   
+   # open output
+   fileOut1 = open(filePrefix + ".temp3.R1.fastq", "w")
+   fileOut2 = open(filePrefix + ".temp2.R2.fastq", "w")
+   fileIn1  = open(filePrefix + ".temp2.R1.txt"  , "r")
+   fileIn2  = open(filePrefix + ".temp1.R2.fastq", "r")
+
+   # keep required number of bases of primer (primer3Bases) and tag read Id with primer info (chrom-direction-loc3)
+   primer3Bases = int(primer3Bases)
+   for line in fileIn1:
+      vals = line.strip("\n").split("\t")
+
+      # check if read matched any primer
+      if vals[1] == "-1":
+         (readId, primerInfo,seq1, bq1) = vals[:4]
+         err = "-1"         
+      else:
+         (readId, err, locL, locR, seqL, seq, seqR, primerInfo, bqL, bq, bqR) = vals         
+
+         # keep required number of bases from primer
+         if primer3Bases == -1 or primer3Bases > len(seq):
+            seq1 = seq + seqR
+            bq1  =  bq + bqR
+         else:
+            seq1 = seq[-primer3Bases:] + seqR         
+            bq1  =  bq[-primer3Bases:] + bqR
+         
+      primerTag = tagNamePrimer + ":Z:" + primerInfo
+      primerErrTag = tagNamePrimerErr + ":Z:" + err            
       
+      # save R1 lines to disk
+      fileOut1.write("@" + readId + "\t" + primerTag + "\t" + primerErrTag + "\n")
+      fileOut1.write(seq1 + "\n")
+      fileOut1.write("+\n")
+      fileOut1.write(bq1 + "\n")      
+      
+      # tag R2 read Id and save
+      lineR2 = fileIn2.readline()
+      readId_ = lineR2.strip("@\n")
+      if readId_ != readId:
+         raise Exception("R1/R2 no synchronized")
+      lineR2 = "@" + readId + "\t" + primerTag + "\t" + primerErrTag + "\n"
+      fileOut2.write(lineR2)
+      
+      # save rest of R2 lines
+      for lineIdx in range(3):
+         lineR2 = fileIn2.readline()
+         fileOut2.write(lineR2)
+         
+   fileOut1.close()
+   fileOut2.close()
+
    # delete unneeded temp files
    os.remove(filePrefix + ".temp0.R1.fastq")
    os.remove(filePrefix + ".temp0.R2.fastq")
+   os.remove(filePrefix + ".temp1.R1.fastq")
+   os.remove(filePrefix + ".temp1.R2.fastq")
+   os.remove(filePrefix + ".temp2.R1.fastq")   
+   os.remove(filePrefix + ".temp2.R1.txt"  )   
    
    # rename the output files - overwrite the input files!
-   os.rename(filePrefix + ".temp1.R1.fastq", filePrefix + ".R1.fastq")
-   os.rename(filePrefix + ".temp1.R2.fastq", filePrefix + ".R2.fastq")
+   os.rename(filePrefix + ".temp3.R1.fastq", filePrefix + ".R1.fastq")
+   os.rename(filePrefix + ".temp2.R2.fastq", filePrefix + ".R2.fastq")
    
 #-------------------------------------------------------------------------------------
 if __name__ == "__main__":
    cutadaptDir = sys.argv[1]
-   umiTagName = sys.argv[2]
-   readFilePrefix = sys.argv[3]
-   run(cutadaptDir,umiTagName,readFilePrefix)
+   tagNameUmiSeq = sys.argv[2]
+   tagNamePrimer = sys.argv[3]
+   tagNamePrimerErr = sys.argv[4]
+   primerFasta = sys.argv[5]
+   primer3Bases = sys.argv[6]
+   readFilePrefix = sys.argv[7]
+   run(cutadaptDir,tagNameUmiSeq,tagNamePrimer,tagNamePrimerErr,primerFasta,primer3Bases,readFilePrefix)

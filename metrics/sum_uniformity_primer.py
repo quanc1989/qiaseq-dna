@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------------------
 def getUniformityMetrics(depths):
 
-   # get total cummulative depth
+   # get total cumulative depth
    depthTotal = sum(depths)
    
    # if zero depth at all primers/sites, return zeros

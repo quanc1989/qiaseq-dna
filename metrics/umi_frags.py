@@ -151,7 +151,8 @@ def run(cfg):
       fileout.write("{}\t{}\n".format(metricVal,metricName))
    
    # write internal priming metrics
-   fileout.write("{:4.1f}\t% of UMIs with >= one read from internal downstream priming\n".format(100.0 * totMoleculesWithResampleRead / totMolecules))
+   totMoleculesWithResampleReadPct = 100.0 * totMoleculesWithResampleRead / totMolecules if totMolecules > 0 else 0
+   fileout.write("{:4.1f}\t% of UMIs with >= one read from internal downstream priming\n".format(totMoleculesWithResampleReadPct))
    fileout.write("{:4.1f}\t% of reads from internal downstream priming\n".format(100.0 * totReadsFromResample / totReads))
    fileout.close()
    
