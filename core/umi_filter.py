@@ -208,8 +208,9 @@ def run(cfg,bamFileIn):
       
       # bases to adjust for removed bases from 5' of primer
       primerOffset = primerLen if (primer3Bases == -1 or primer3Bases > primerLen) else primer3Bases
+      primerOffsetAbs = primerOffset
       if primerStrand == 1:
-         primerOffset = -primerOffset
+         primerOffset = -primerOffsetAbs
       
       # get some alignment info from R1 read (SPE primer side)
       readSeq     = read1.seq
@@ -251,9 +252,9 @@ def run(cfg,bamFileIn):
       
       # drop read pair if R2 not aligned to 15 bp beyond the primer (assuming primer does not have huge indel bubbles)
       if alignStrand == 1:
-         endogenousLen = alignLoc - read2.pos + 1 - len(primer)
+         endogenousLen = alignLoc - read2.pos + 1 - primerOffsetAbs
       else:
-         endogenousLen = read2.aend - alignLoc - len(primer)
+         endogenousLen = read2.aend - alignLoc - primerOffsetAbs
       if endogenousLen < endogenousLenMin:
          readPairCounts[NUM_ENDOGENOUS_BP_ALIGNED_TOO_LOW] += 1
          continue     
